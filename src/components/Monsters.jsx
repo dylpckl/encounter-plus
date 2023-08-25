@@ -2,7 +2,6 @@ function Monsters({ monsters }) {
   //   console.log(monsters);
   return (
     <>
-      <h1>monsters????</h1>
       <ul>
         {monsters.map((monster) => (
           <li key={monster.name}>

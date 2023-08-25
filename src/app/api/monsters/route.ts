@@ -2,6 +2,24 @@ import { NextResponse } from "next/server";
 
 const url = "https://www.dnd5eapi.co/graphql";
 
+// query {
+//   monsters(limit: 100) {
+//     name
+//   }
+// }
+// 2nd page:
+// query {
+//   monsters(limit: 100, skip: 100) {
+//     name
+//   }
+// }
+// 3rd page:
+// query {
+//   monsters(limit: 100, skip: 200) {
+//     name
+//   }
+// }
+
 export async function POST(request: Request) {
   const query = `
         query {
