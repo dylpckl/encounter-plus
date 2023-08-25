@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-
+import { nanoid } from 'nanoid'
 import SearchBar from "@/components/SearchBar";
 import SearchResults from "@/components/Monsters";
 import ActiveMonsters from "@/components/ActiveMonsters";
@@ -8,16 +8,106 @@ import ActiveMonsters from "@/components/ActiveMonsters";
 import rollInitiative from "@/lib/rollInitiative";
 
 const monsters = [
-  { name: "Acolyte", dexterity: 17 },
-  { name: "Aboleth", dexterity: 17 },
-  { name: "Adult Black Dragon", dexterity: 17 },
-  { name: "Adult Blue Dragon", dexterity: 17 },
-  { name: "Adult Brass Dragon", dexterity: 17 },
-  { name: "Adult Copper Dragon", dexterity: 17 },
-  { name: "Adult Gold Dragon", dexterity: 17 },
-  { name: "Adult Bronze Dragon", dexterity: 17 },
-  { name: "Adult Green Dragon", dexterity: 17 },
-  { name: "Adult Red Dragon", dexterity: 17 },
+  {
+    name: "Acolyte",
+    dexterity: 17,
+    armor_class: [
+      {
+        value: 13,
+      },
+    ],
+    hit_points: 102,
+  },
+  {
+    name: "Aboleth",
+    dexterity: 17,
+    armor_class: [
+      {
+        value: 13,
+      },
+    ],
+    hit_points: 102,
+  },
+  {
+    name: "Adult Black Dragon",
+    dexterity: 17,
+    armor_class: [
+      {
+        value: 13,
+      },
+    ],
+    hit_points: 102,
+  },
+  {
+    name: "Adult Blue Dragon",
+    dexterity: 17,
+    armor_class: [
+      {
+        value: 13,
+      },
+    ],
+    hit_points: 102,
+  },
+  {
+    name: "Adult Brass Dragon",
+    dexterity: 17,
+    armor_class: [
+      {
+        value: 13,
+      },
+    ],
+    hit_points: 102,
+  },
+  {
+    name: "Adult Copper Dragon",
+    dexterity: 17,
+    armor_class: [
+      {
+        value: 13,
+      },
+    ],
+    hit_points: 102,
+  },
+  {
+    name: "Adult Gold Dragon",
+    dexterity: 17,
+    armor_class: [
+      {
+        value: 13,
+      },
+    ],
+    hit_points: 102,
+  },
+  {
+    name: "Adult Bronze Dragon",
+    dexterity: 17,
+    armor_class: [
+      {
+        value: 13,
+      },
+    ],
+    hit_points: 102,
+  },
+  {
+    name: "Adult Green Dragon",
+    dexterity: 17,
+    armor_class: [
+      {
+        value: 13,
+      },
+    ],
+    hit_points: 102,
+  },
+  {
+    name: "Adult Red Dragon",
+    dexterity: 17,
+    armor_class: [
+      {
+        value: 13,
+      },
+    ],
+    hit_points: 102,
+  },
 ];
 
 function filterMonsters(monsters, query) {
@@ -56,7 +146,18 @@ export default function Home() {
 
     setActiveMonsters([
       ...activeMonsters,
-      { name: monster.name, active: true, init: rollInitiative(monster.dexterity) },
+      // {
+      //   name: monster.name,
+      //   armorClass: monster.armor_class[0].value,
+      //   active: true,
+      //   init: rollInitiative(monster.dexterity),
+      // },
+      {
+        ...monster,
+        active: true,
+        init: rollInitiative(monster.dexterity),
+        id: nanoid(),
+      },
     ]);
   }
 
