@@ -2,19 +2,22 @@
 import { useState, useEffect } from "react";
 
 import SearchBar from "@/components/SearchBar";
-import Monsters from "@/components/Monsters";
+import SearchResults from "@/components/Monsters";
+import ActiveMonsters from "@/components/ActiveMonsters";
+
+import rollInitiative from "@/lib/rollInitiative";
 
 const monsters = [
-  { name: "Acolyte" },
-  { name: "Aboleth" },
-  { name: "Adult Black Dragon" },
-  { name: "Adult Blue Dragon" },
-  { name: "Adult Brass Dragon" },
-  { name: "Adult Copper Dragon" },
-  { name: "Adult Gold Dragon" },
-  { name: "Adult Bronze Dragon" },
-  { name: "Adult Green Dragon" },
-  { name: "Adult Red Dragon" },
+  { name: "Acolyte", dexterity: 17 },
+  { name: "Aboleth", dexterity: 17 },
+  { name: "Adult Black Dragon", dexterity: 17 },
+  { name: "Adult Blue Dragon", dexterity: 17 },
+  { name: "Adult Brass Dragon", dexterity: 17 },
+  { name: "Adult Copper Dragon", dexterity: 17 },
+  { name: "Adult Gold Dragon", dexterity: 17 },
+  { name: "Adult Bronze Dragon", dexterity: 17 },
+  { name: "Adult Green Dragon", dexterity: 17 },
+  { name: "Adult Red Dragon", dexterity: 17 },
 ];
 
 function filterMonsters(monsters, query) {
@@ -37,15 +40,27 @@ function filterMonsters(monsters, query) {
 
 export default function Home() {
   const [query, setQuery] = useState("");
-  // const [first, setfirst] = useState(second);
+  const [activeMonsters, setActiveMonsters] = useState([]);
   const results = filterMonsters(monsters, query);
   // const monsters = await getMonsters();
   // console.log(monsters);
   // const [monsters, setMonsters] = useState([]);
 
-  function handleChange(e) {
+  function handleSearchChange(e) {
     setQuery(e.target.value);
   }
+
+  // add to initiative
+  function handleMonsterActive(monster) {
+    // rollInitiative(monster.dexterity);
+
+    setActiveMonsters([
+      ...activeMonsters,
+      { name: monster.name, active: true, init: rollInitiative(monster.dexterity) },
+    ]);
+  }
+
+  function removeActiveMonster(monster) {}
 
   // useEffect(() => {
   //   const getMonsters = async () => {
@@ -61,11 +76,23 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <SearchBar
-        query={query}
-        onChange={handleChange}
+      <div>
+        <SearchBar
+          query={query}
+          onChange={handleSearchChange}
+        />
+        {query.length > 0 && (
+          <SearchResults
+            monsters={results}
+            onChange={handleMonsterActive}
+          />
+        )}
+      </div>
+
+      <ActiveMonsters
+        monsters={activeMonsters}
+        // onChange={handleMonsterActive}
       />
-      {results && <Monsters monsters={results} />}
     </main>
   );
 }

@@ -1,10 +1,13 @@
-function Monsters({ monsters }) {
+function SearchResults({ monsters, onChange }) {
   //   console.log(monsters);
   return (
     <>
-      <ul>
+      <ul className="bg-teal-300 text-black">
         {monsters.map((monster) => (
-          <li key={monster.name}>
+          <li
+            key={monster.name}
+            onClick={() => onChange(monster)}
+          >
             <h3>{monster.name}</h3>
           </li>
         ))}
@@ -13,4 +16,4 @@ function Monsters({ monsters }) {
   );
 }
 
-export default Monsters;
+export default SearchResults;

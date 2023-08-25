@@ -48,10 +48,8 @@ export default function SearchBar({ query, onChange }) {
         value={query}
         placeholder="Search for a monster..."
         onChange={onChange}
-        // onChange={(e) => setValue(e.target.value)}
         className="text-black"
       />
-      <button type="submit">btn</button>
     </div>
   );
 }
