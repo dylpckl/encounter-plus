@@ -23,7 +23,7 @@ import { useState, ChangeEvent } from "react";
 //   // console.log("POSTS", posts);
 // }
 
-export default function SearchBar({ query, onChange }) {
+export default function SearchBar({ query, onChange, onClick }) {
   // const router = useRouter();
   // const [value, setValue] = useState("");
 
@@ -41,15 +41,20 @@ export default function SearchBar({ query, onChange }) {
   // };
 
   return (
-    <div>
-      <h1>search</h1>
+    <div className="relative rounded-md">
       <input
         type="text"
         value={query}
         placeholder="Search for a monster..."
-        onChange={onChange}
+        onChange={onChange} //handleSearchChange
         className="text-black"
       />
+      <button
+        onClick={onClick} // clearQuery
+        className="absolute right-0 pr-3 text-black inset-y-0"
+      >
+        x
+      </button>
     </div>
   );
 }
