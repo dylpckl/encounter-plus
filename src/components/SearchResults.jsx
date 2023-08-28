@@ -1,5 +1,5 @@
 function SearchResults({ monsters, onChange }) {
-  //   console.log(monsters);
+  console.log(monsters);
   return (
     <>
       <ul className="bg-teal-300 text-black absolute z-20 w-full mx-3">

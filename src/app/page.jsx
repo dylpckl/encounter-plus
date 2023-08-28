@@ -1,11 +1,8 @@
-"use client";
-import { useState, useEffect } from "react";
-import { nanoid } from "nanoid";
-import SearchBar from "@/components/SearchBar";
-import SearchResults from "@/components/Monsters";
-import ActiveMonsters from "@/components/ActiveMonsters";
+// "use client";
+// import { useState, useEffect } from "react";
+// import { nanoid } from "nanoid";
 
-import rollInitiative from "@/lib/rollInitiative";
+// import rollInitiative from "@/lib/rollInitiative";
 
 import InitTracker from "@/components/InitTracker";
 
@@ -137,42 +134,6 @@ export default function Home() {
 
   // EVENT HANDLERS ------------------------------------------------------
   // These are sent down to child components as props
-  // ---------------------------------------------------------------------
-  function handleSearchChange(e) {
-    setQuery(e.target.value);
-  }
-
-  function clearQuery() {
-    // passed to SearchBar to enable clearing the input
-    setQuery("");
-  }
-
-  function handleMonsterActive(monster) {
-    // add to initiative
-    setActiveMonsters([
-      ...activeMonsters,
-      {
-        ...monster,
-        active: true,
-        init: rollInitiative(monster.dexterity),
-        id: nanoid(),
-      },
-    ]);
-  }
-
-  function removeActiveMonster(monster) {}
-
-  // useEffect(() => {
-  //   const getMonsters = async () => {
-  //     const response = await fetch("/api/monsters", { method: "POST" });
-
-  //     const monsters = await response.json();
-  //     // console.log(monsters);
-  //     setMonsters(monsters.data.data.monsters);
-  //   };
-
-  //   getMonsters();
-  // }, []);
 
   return (
     <>

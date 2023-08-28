@@ -47,9 +47,9 @@ function MonsterCard({ monster }) {
       <div>
         <label
           htmlFor="init"
-          className="uppercase text-sm"
+          className="text-sm"
         >
-          Init
+          Init.
         </label>
         <input
           id="init"
@@ -62,14 +62,45 @@ function MonsterCard({ monster }) {
       </div>
 
       <div className="flex flex-col w-full">
-        <h2>{monster.name}</h2>
+        <h2 className="">{monster.name}</h2>
         {/* <span>{monster.id}</span> */}
 
         <span className="text-xs">
           <span className="text-slate-400 mr-2">AC</span>
           {monster.armor_class[0].value}
         </span>
-        <span>resistances, saving throws</span>
+        <ul>
+          {monster.damage_resistances.map((resist, index) => (
+            <li key={index}>{resist}</li>
+          ))}
+        </ul>
+
+        <ul>
+          {
+            monster.proficiencies.map((prof, index) => {
+              let profName = prof.proficiency.index;
+              return (
+                profName.includes("saving-throw") && (
+                  <li
+                    key={index}
+                    className="text-xs"
+                  >
+                    <span className="uppercase">{profName.slice(-3)}</span>
+                    {" +"}
+                    {prof.value}
+                  </li>
+                )
+              );
+            })
+
+            // <li key={index}>
+            //   <span className="uppercase">
+            //     {prof.proficiency.index.slice(-3)}
+            //   </span>{" +"}
+            //   {prof.value}
+            // </li>
+          }
+        </ul>
       </div>
 
       <div>

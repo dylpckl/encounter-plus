@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { nanoid } from "nanoid";
 import SearchBar from "@/components/SearchBar";
-import SearchResults from "@/components/Monsters";
+import SearchResults from "@/components/SearchResults";
 import ActiveMonsters from "@/components/ActiveMonsters";
 import rollInitiative from "@/lib/rollInitiative";
 
@@ -131,6 +131,8 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [activeMonsters, setActiveMonsters] = useState([]);
   const results = filterMonsters(monsters, query);
+  const [monsterResults, setMonsterResults] = useState([]);
+  const [roundCounter, setRoundCounter] = useState(1);
   // const monsters = await getMonsters();
   // console.log(monsters);
   // const [monsters, setMonsters] = useState([]);
@@ -140,7 +142,7 @@ export default function Home() {
   // ---------------------------------------------------------------------
   function handleSearchChange(e) {
     setQuery(e.target.value);
-    console.log(query);
+    // console.log(query);
 
     const variables = { name: query };
 
@@ -154,6 +156,7 @@ export default function Home() {
       const data = await res.json();
       console.log(data);
       // return res.json();
+      setMonsterResults(data);
     };
 
     fetchMonsters();
@@ -170,7 +173,7 @@ export default function Home() {
       ...activeMonsters,
       {
         ...monster,
-        // active: true,
+        active: false,
         init: rollInitiative(monster.dexterity),
         id: nanoid(),
       },
@@ -180,39 +183,58 @@ export default function Home() {
   function removeActiveMonster(monster) {}
 
   function startCombat() {
-    activeMonsters.map((monster) => {
-      setActiveMonsters([...activeMonsters, { ...monster, active: true }]);
-    });
+    const sortedMonsters = activeMonsters
+      .slice()
+      .sort((a, b) => b.init - a.init);
+    console.log(sortedMonsters);
+    // Mark the monster with the highest "init" value as active
+    const updatedMonsters = sortedMonsters.map((monster, index) => ({
+      ...monster,
+      active: index === 0, // Set the first monster as active
+    }));
+
+    setActiveMonsters(updatedMonsters);
   }
 
-  function handleNextTurn() {
-    // find currently active monster, set active to false
-    // set next monster active = true
-    // increment round counter
+  function nextTurn() {
+    const activeIndex = activeMonsters.findIndex((monster) => monster.active);
+
+    if (activeIndex !== -1) {
+      const updatedMonsters = [...activeMonsters]; // copy the activeMonster array so that we don't modify the original
+      updatedMonsters[activeIndex].active = false; // mark the currently active monster as inactive
+
+      const sortedMonsters = updatedMonsters
+        .slice()
+        .sort((a, b) => b.init - a.init);
+
+      // find the index of the next monster that will be active.
+      // If activeIndex is less than the length of sortedMonsters - 1, increment the index by 1.
+      // Otherwise, if it's the last monster in the array, wrap around to the first monster (0 index)
+      const nextActiveIndex =
+        activeIndex < sortedMonsters.length - 1 ? activeIndex + 1 : 0;
+
+      // Check if the next turn starts a new round
+      if (nextActiveIndex === 0) {
+        setRoundCounter(roundCounter + 1);
+      }
+
+      sortedMonsters[nextActiveIndex].active = true;
+
+      setActiveMonsters(sortedMonsters);
+    }
   }
-
-  // useEffect(() => {
-  //   const getMonsters = async () => {
-  //     const response = await fetch("/api/monsters", { method: "POST" });
-
-  //     const monsters = await response.json();
-  //     // console.log(monsters);
-  //     setMonsters(monsters.data.data.monsters);
-  //   };
-
-  //   getMonsters();
-  // }, []);
 
   return (
-    <div className="bg-slate-600 overflow-y-auto rounded-lg col-span-4 row-span-6 m-3 p-3 flex flex-col items-center relative">
+    <div className="bg-slate-600  rounded-lg col-span-4 row-span-6 m-3 p-3 flex flex-col items-center relative">
       <div
         id="header"
-        className="w-full bg-pink-600"
+        className="w-full bg-pink-600 "
       >
         <h1 className="text-sm uppercase">Initiative</h1>
         <div className="">
           <button onClick={() => setActiveMonsters([])}>clear</button>
           <span>round:</span>
+          {roundCounter}
         </div>
       </div>
 
@@ -224,19 +246,21 @@ export default function Home() {
         />
         {query.length > 0 && (
           <SearchResults
-            monsters={results}
+            monsters={monsterResults}
             onChange={handleMonsterActive}
           />
         )}
       </div>
 
-      <ActiveMonsters
-        monsters={activeMonsters}
-        // onChange={handleMonsterActive}
-      />
+      <div className="overflow-y-auto">
+        <ActiveMonsters
+          monsters={activeMonsters}
+          // onChange={handleMonsterActive}
+        />
+      </div>
       <div className="flex w-full justify-between">
-        <button>start combat</button>
-        <button>next turn</button>
+        <button onClick={startCombat}>start combat</button>
+        <button onClick={nextTurn}>next turn</button>
       </div>
     </div>
   );
