@@ -1,11 +1,18 @@
 "use client";
 
 import { useState } from "react";
+// import clsx from "clsx";
+
+function classNames(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
 
 function MonsterCard({ monster }) {
   const [currHP, setCurrHP] = useState(monster.hit_points);
   const [inputValue, setInputValue] = useState(0);
   console.log(monster);
+
+  const { active } = monster;
 
   const init = monster.init.toString();
 
@@ -30,9 +37,20 @@ function MonsterCard({ monster }) {
   };
 
   return (
-    <div className="backdrop-blur-md bg-slate-800 rounded-lg p-4 flex items-center justify-between gap-2">
+    // <div className="backdrop-blur-md bg-slate-800 rounded-lg p-4 flex items-center justify-between gap-2">
+    <div
+      className={classNames(
+        monster.active ? "bg-red-300" : "bg-slate-500",
+        "backdrop-blur-md rounded-lg p-4 flex items-center justify-between gap-2"
+      )}
+    >
       <div>
-        <label htmlFor="init" className="uppercase text-sm">Init</label>
+        <label
+          htmlFor="init"
+          className="uppercase text-sm"
+        >
+          Init
+        </label>
         <input
           id="init"
           className="block w-10 text-center rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -51,6 +69,7 @@ function MonsterCard({ monster }) {
           <span className="text-slate-400 mr-2">AC</span>
           {monster.armor_class[0].value}
         </span>
+        <span>resistances, saving throws</span>
       </div>
 
       <div>
@@ -65,6 +84,7 @@ function MonsterCard({ monster }) {
           onKeyDown={handleInputKeyDown}
         />
       </div>
+      <div>delete, dead</div>
     </div>
   );
 }

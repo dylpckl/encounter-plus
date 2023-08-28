@@ -2,7 +2,7 @@ function SearchResults({ monsters, onChange }) {
   //   console.log(monsters);
   return (
     <>
-      <ul className="bg-teal-300 text-black absolute z-20">
+      <ul className="bg-teal-300 text-black absolute z-20 w-full mx-3">
         {monsters.map((monster) => (
           <li
             key={monster.name}

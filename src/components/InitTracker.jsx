@@ -4,7 +4,6 @@ import { nanoid } from "nanoid";
 import SearchBar from "@/components/SearchBar";
 import SearchResults from "@/components/Monsters";
 import ActiveMonsters from "@/components/ActiveMonsters";
-
 import rollInitiative from "@/lib/rollInitiative";
 
 const monsters = [
@@ -141,6 +140,23 @@ export default function Home() {
   // ---------------------------------------------------------------------
   function handleSearchChange(e) {
     setQuery(e.target.value);
+    console.log(query);
+
+    const variables = { name: query };
+
+    // hit API with query
+    const fetchMonsters = async () => {
+      const res = await fetch("/api/monsters", {
+        method: "POST",
+        body: JSON.stringify({ variables: variables }),
+      });
+      // if(res.status=)
+      const data = await res.json();
+      console.log(data);
+      // return res.json();
+    };
+
+    fetchMonsters();
   }
 
   function clearQuery() {
@@ -154,7 +170,7 @@ export default function Home() {
       ...activeMonsters,
       {
         ...monster,
-        active: true,
+        // active: true,
         init: rollInitiative(monster.dexterity),
         id: nanoid(),
       },
@@ -162,6 +178,18 @@ export default function Home() {
   }
 
   function removeActiveMonster(monster) {}
+
+  function startCombat() {
+    activeMonsters.map((monster) => {
+      setActiveMonsters([...activeMonsters, { ...monster, active: true }]);
+    });
+  }
+
+  function handleNextTurn() {
+    // find currently active monster, set active to false
+    // set next monster active = true
+    // increment round counter
+  }
 
   // useEffect(() => {
   //   const getMonsters = async () => {
@@ -176,15 +204,19 @@ export default function Home() {
   // }, []);
 
   return (
-    <div className="bg-slate-600 rounded-lg col-span-4 row-span-6 m-3 p-3 flex flex-col items-center relative">
-      
-      <div id="header" className="w-full bg-pink-600">
+    <div className="bg-slate-600 overflow-y-auto rounded-lg col-span-4 row-span-6 m-3 p-3 flex flex-col items-center relative">
+      <div
+        id="header"
+        className="w-full bg-pink-600"
+      >
         <h1 className="text-sm uppercase">Initiative</h1>
-        <button>clear</button>
-        <span>round:</span>
+        <div className="">
+          <button onClick={() => setActiveMonsters([])}>clear</button>
+          <span>round:</span>
+        </div>
       </div>
-      
-      <div className="">
+
+      <div className="w-full">
         <SearchBar
           query={query}
           onChange={handleSearchChange}
@@ -202,6 +234,10 @@ export default function Home() {
         monsters={activeMonsters}
         // onChange={handleMonsterActive}
       />
+      <div className="flex w-full justify-between">
+        <button>start combat</button>
+        <button>next turn</button>
+      </div>
     </div>
   );
 }

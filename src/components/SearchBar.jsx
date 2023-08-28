@@ -24,6 +24,8 @@ import { useState, ChangeEvent } from "react";
 // }
 
 export default function SearchBar({ query, onChange, onClick }) {
+
+
   // const router = useRouter();
   // const [value, setValue] = useState("");
 
