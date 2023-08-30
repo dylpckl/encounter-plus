@@ -179,6 +179,22 @@ export default function Home() {
         active: false,
         init: rollInitiative(monster.dexterity),
         id: nanoid(),
+        conditions: {
+          BLND: false,
+          CHRM: false,
+          DEAF: false,
+          FRGHT: false,
+          GRPL: false,
+          INCAP: false,
+          INVIS: false,
+          PRLZ: false,
+          PETR: false,
+          POIS: false,
+          PRNE: false,
+          REST: false,
+          STUN: false,
+          UNCON: false,
+        },
       },
     ]);
   }
@@ -207,6 +223,24 @@ export default function Home() {
       const updatedMonsters = activeMonsters.filter(
         (_, index) => index !== monsterIndex
       );
+      setActiveMonsters(updatedMonsters);
+    }
+  }
+
+  function handleMonsterCondition(monster, condition) {
+    const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
+    if (monsterIndex !== -1) {
+      const updatedMonsters = [...activeMonsters];
+      const currentConditionValue = monster.conditions[condition];
+      updatedMonsters[monsterIndex] = {
+        ...monster,
+        conditions: {
+          ...monster.conditions,
+          [condition]: !currentConditionValue,
+        },
+      };
+
+      // Update the state with the new array
       setActiveMonsters(updatedMonsters);
     }
   }
@@ -331,6 +365,7 @@ export default function Home() {
                 onKill={handleKill}
                 onDelete={handleDeleteMonster}
                 onInitChange={handleMonsterInitChange}
+                onSetCondition={handleMonsterCondition}
               />
             </li>
           ))}

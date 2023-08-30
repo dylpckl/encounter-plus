@@ -24,7 +24,13 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-function MonsterCard({ monster, onInitChange, onKill, onDelete }) {
+function MonsterCard({
+  monster,
+  onInitChange,
+  onKill,
+  onDelete,
+  onSetCondition,
+}) {
   const [currHP, setCurrHP] = useState(monster.hit_points);
   const [inputValue, setInputValue] = useState(0);
   console.log(monster);
@@ -162,7 +168,13 @@ function MonsterCard({ monster, onInitChange, onKill, onDelete }) {
         <ul className="flex gap-1 flex-wrap">
           {CONDITIONS.sort().map((cond) => (
             <li key={cond}>
-              <button className="bg-slate-600 px-2 py-1 rounded-md text-xs hover:bg-slate-400">
+              <button
+                onClick={() => onSetCondition(monster, cond)}
+                className={classNames(
+                  monster.conditions[cond] ? "bg-red-300" : "bg-slate-400",
+                  "px-2 py-1 rounded-md text-xs hover:bg-slate-700"
+                )}
+              >
                 {cond}
               </button>
             </li>
