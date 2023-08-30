@@ -200,11 +200,16 @@ export default function Home() {
     }
   }
 
-  function handleDelete(monster) {
+  function handleDeleteMonster(monster) {
     // remove monster from activeMonsters
+    const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
+    if (monsterIndex !== -1) {
+      const updatedMonsters = activeMonsters.filter(
+        (_, index) => index !== monsterIndex
+      );
+      setActiveMonsters(updatedMonsters);
+    }
   }
-
-  function removeActiveMonster(monster) {}
 
   function startCombat() {
     const sortedMonsters = activeMonsters
@@ -274,6 +279,15 @@ export default function Home() {
     setActiveMonsters(updatedMonsters);
   }
 
+  function handleMonsterUpdate(monster, keyToUpdate, newValue) {
+    const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
+    if (monsterIndex !== -1) {
+      const updatedMonsters = [...activeMonsters];
+      updatedMonsters[monsterIndex] = { ...monster, [keyToUpdate]: newValue };
+      setActiveMonsters(updatedMonsters);
+    }
+  }
+
   return (
     <div className="bg-slate-600 rounded-lg col-span-4 row-span-6 m-5 p-3 flex flex-col items-center relative">
       <div
@@ -315,6 +329,7 @@ export default function Home() {
               <MonsterCard
                 monster={monster}
                 onKill={handleKill}
+                onDelete={handleDeleteMonster}
                 onInitChange={handleMonsterInitChange}
               />
             </li>

@@ -146,7 +146,7 @@ function MonsterCard({ monster, onInitChange, onKill, onDelete }) {
             </svg>
           </button>
 
-          <button onClick={onDelete}>
+          <button onClick={() => onDelete(monster)}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 448 512"
