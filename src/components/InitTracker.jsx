@@ -5,109 +5,110 @@ import SearchBar from "@/components/SearchBar";
 import SearchResults from "@/components/SearchResults";
 import ActiveMonsters from "@/components/ActiveMonsters";
 import rollInitiative from "@/lib/rollInitiative";
+import MonsterCard from "./MonsterCard";
 
-const monsters = [
-  {
-    name: "Acolyte",
-    dexterity: 17,
-    armor_class: [
-      {
-        value: 13,
-      },
-    ],
-    hit_points: 102,
-  },
-  {
-    name: "Aboleth",
-    dexterity: 17,
-    armor_class: [
-      {
-        value: 13,
-      },
-    ],
-    hit_points: 102,
-  },
-  {
-    name: "Adult Black Dragon",
-    dexterity: 17,
-    armor_class: [
-      {
-        value: 13,
-      },
-    ],
-    hit_points: 102,
-  },
-  {
-    name: "Adult Blue Dragon",
-    dexterity: 17,
-    armor_class: [
-      {
-        value: 13,
-      },
-    ],
-    hit_points: 102,
-  },
-  {
-    name: "Adult Brass Dragon",
-    dexterity: 17,
-    armor_class: [
-      {
-        value: 13,
-      },
-    ],
-    hit_points: 102,
-  },
-  {
-    name: "Adult Copper Dragon",
-    dexterity: 17,
-    armor_class: [
-      {
-        value: 13,
-      },
-    ],
-    hit_points: 102,
-  },
-  {
-    name: "Adult Gold Dragon",
-    dexterity: 17,
-    armor_class: [
-      {
-        value: 13,
-      },
-    ],
-    hit_points: 102,
-  },
-  {
-    name: "Adult Bronze Dragon",
-    dexterity: 17,
-    armor_class: [
-      {
-        value: 13,
-      },
-    ],
-    hit_points: 102,
-  },
-  {
-    name: "Adult Green Dragon",
-    dexterity: 17,
-    armor_class: [
-      {
-        value: 13,
-      },
-    ],
-    hit_points: 102,
-  },
-  {
-    name: "Adult Red Dragon",
-    dexterity: 17,
-    armor_class: [
-      {
-        value: 13,
-      },
-    ],
-    hit_points: 102,
-  },
-];
+// const monsters = [
+//   {
+//     name: "Acolyte",
+//     dexterity: 17,
+//     armor_class: [
+//       {
+//         value: 13,
+//       },
+//     ],
+//     hit_points: 102,
+//   },
+//   {
+//     name: "Aboleth",
+//     dexterity: 17,
+//     armor_class: [
+//       {
+//         value: 13,
+//       },
+//     ],
+//     hit_points: 102,
+//   },
+//   {
+//     name: "Adult Black Dragon",
+//     dexterity: 17,
+//     armor_class: [
+//       {
+//         value: 13,
+//       },
+//     ],
+//     hit_points: 102,
+//   },
+//   {
+//     name: "Adult Blue Dragon",
+//     dexterity: 17,
+//     armor_class: [
+//       {
+//         value: 13,
+//       },
+//     ],
+//     hit_points: 102,
+//   },
+//   {
+//     name: "Adult Brass Dragon",
+//     dexterity: 17,
+//     armor_class: [
+//       {
+//         value: 13,
+//       },
+//     ],
+//     hit_points: 102,
+//   },
+//   {
+//     name: "Adult Copper Dragon",
+//     dexterity: 17,
+//     armor_class: [
+//       {
+//         value: 13,
+//       },
+//     ],
+//     hit_points: 102,
+//   },
+//   {
+//     name: "Adult Gold Dragon",
+//     dexterity: 17,
+//     armor_class: [
+//       {
+//         value: 13,
+//       },
+//     ],
+//     hit_points: 102,
+//   },
+//   {
+//     name: "Adult Bronze Dragon",
+//     dexterity: 17,
+//     armor_class: [
+//       {
+//         value: 13,
+//       },
+//     ],
+//     hit_points: 102,
+//   },
+//   {
+//     name: "Adult Green Dragon",
+//     dexterity: 17,
+//     armor_class: [
+//       {
+//         value: 13,
+//       },
+//     ],
+//     hit_points: 102,
+//   },
+//   {
+//     name: "Adult Red Dragon",
+//     dexterity: 17,
+//     armor_class: [
+//       {
+//         value: 13,
+//       },
+//     ],
+//     hit_points: 102,
+//   },
+// ];
 
 function filterMonsters(monsters, query) {
   query = query.toLowerCase();
@@ -130,9 +131,10 @@ function filterMonsters(monsters, query) {
 export default function Home() {
   const [query, setQuery] = useState("");
   const [activeMonsters, setActiveMonsters] = useState([]);
-  const results = filterMonsters(monsters, query);
+  // const results = filterMonsters(monsters, query);
   const [monsterResults, setMonsterResults] = useState([]);
   const [roundCounter, setRoundCounter] = useState(1);
+  const sortedMonsters = activeMonsters.sort((a, b) => b.init - a.init);
   // const monsters = await getMonsters();
   // console.log(monsters);
   // const [monsters, setMonsters] = useState([]);
@@ -154,7 +156,7 @@ export default function Home() {
       });
       // if(res.status=)
       const data = await res.json();
-      console.log(data);
+      // console.log(data);
       // return res.json();
       setMonsterResults(data);
     };
@@ -173,11 +175,33 @@ export default function Home() {
       ...activeMonsters,
       {
         ...monster,
+        maxHP: monster.hit_points,
         active: false,
         init: rollInitiative(monster.dexterity),
         id: nanoid(),
       },
     ]);
+  }
+
+  function handleKill(monster) {
+    // console.log(monster);
+    // set monster hp to zero
+    const monsterIndexToKill = activeMonsters.findIndex(
+      (m) => m.id === monster.id
+    );
+    // console.log(monsterIndexToKill);
+    if (monsterIndexToKill !== -1) {
+      // Create a new array with the updated monster object
+      const updatedMonsters = [...activeMonsters];
+      updatedMonsters[monsterIndexToKill] = { ...monster, hit_points: 0 };
+
+      // Update the state with the new array
+      setActiveMonsters(updatedMonsters);
+    }
+  }
+
+  function handleDelete(monster) {
+    // remove monster from activeMonsters
   }
 
   function removeActiveMonster(monster) {}
@@ -224,8 +248,34 @@ export default function Home() {
     }
   }
 
+  function previousTurn() {
+    const activeIndex = activeMonsters.findIndex((monster) => monster.active);
+
+    if (activeIndex !== -1) {
+      const updatedMonsters = [...activeMonsters];
+      updatedMonsters[activeIndex].active = false;
+
+      const sortedMonsters = updatedMonsters
+        .slice()
+        .sort((a, b) => b.init - a.init);
+      const previousActiveIndex =
+        activeIndex > 0 ? activeIndex - 1 : sortedMonsters.length - 1;
+
+      sortedMonsters[previousActiveIndex].active = true;
+
+      setActiveMonsters(sortedMonsters);
+    }
+  }
+
+  function handleMonsterInitChange(monster, e) {
+    const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
+    const updatedMonsters = [...activeMonsters];
+    updatedMonsters[monsterIndex] = { ...monster, init: e.target.value };
+    setActiveMonsters(updatedMonsters);
+  }
+
   return (
-    <div className="bg-slate-600  rounded-lg col-span-4 row-span-6 m-3 p-3 flex flex-col items-center relative">
+    <div className="bg-slate-600 rounded-lg col-span-4 row-span-6 m-5 p-3 flex flex-col items-center relative">
       <div
         id="header"
         className="w-full bg-pink-600 "
@@ -236,31 +286,46 @@ export default function Home() {
           <span>round:</span>
           {roundCounter}
         </div>
-      </div>
 
-      <div className="w-full">
-        <SearchBar
-          query={query}
-          onChange={handleSearchChange}
-          onClick={clearQuery}
-        />
-        {query.length > 0 && (
-          <SearchResults
-            monsters={monsterResults}
-            onChange={handleMonsterActive}
+        <div className="w-full">
+          <SearchBar
+            query={query}
+            onChange={handleSearchChange}
+            onClick={clearQuery}
           />
-        )}
+          {query.length > 0 && (
+            <SearchResults
+              monsters={monsterResults}
+              onChange={handleMonsterActive}
+            />
+          )}
+        </div>
       </div>
-
-      <div className="overflow-y-auto">
-        <ActiveMonsters
+      <div className="overflow-y-auto h-full">
+        {/* <ActiveMonsters
           monsters={activeMonsters}
           // onChange={handleMonsterActive}
-        />
+        /> */}
+
+        {/* const sortedMonsters = monsters.sort((a, b) => b.init - a.init); */}
+
+        <ul className="w-full flex flex-col space-y-2">
+          {sortedMonsters.map((monster) => (
+            <li key={monster.id}>
+              <MonsterCard
+                monster={monster}
+                onKill={handleKill}
+                onInitChange={handleMonsterInitChange}
+              />
+            </li>
+          ))}
+        </ul>
       </div>
-      <div className="flex w-full justify-between">
+
+      <div className="flex w-full justify-between mt-auto">
         <button onClick={startCombat}>start combat</button>
         <button onClick={nextTurn}>next turn</button>
+        <button onClick={previousTurn}>previous turn</button>
       </div>
     </div>
   );
