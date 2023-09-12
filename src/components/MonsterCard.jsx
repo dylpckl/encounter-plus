@@ -112,19 +112,19 @@ function MonsterCard({
         "backdrop-blur-md rounded-lg p-3 flex flex-col items-center justify-between"
       )}
     >
-      <div className="flex w-full">
+      <div className="flex w-full gap-4">
         {/* Init */}
-        <div className="mr-2">
-          <label
+        <div className="">
+          {/* <label
             htmlFor="init"
             className="text-sm"
           >
             Init.
-          </label>
+          </label> */}
           <input
             id="init"
             onChange={(e) => onInitChange(monster, e)}
-            className="block w-10 text-center rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+            className="block w-12 h-6 text-center rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
             type="number"
             value={monster.init}
             min="0"
@@ -140,17 +140,19 @@ function MonsterCard({
             {monster.name}
           </h2>
 
-          <span className="text-xs">
-            <span className="text-slate-400 mr-2">AC</span>
+          {/* <span className="text-xs">
+            <span className="text-slate-300">AC</span>{" "}
             {monster.armor_class[0].value}
-          </span>
+          </span> */}
           {/* <ul>
             {monster.damage_resistances.map((resist, index) => (
               <li key={index}>{resist}</li>
             ))}
           </ul> */}
 
-          <ul className="flex flex-wrap gap-2">
+          <ul className="flex flex-wrap gap-x-2 text-xs">
+            <span className="text-slate-300">AC</span>{" "}
+            {monster.armor_class[0].value}
             {monster.proficiencies.map((prof, index) => {
               let profName = prof.proficiency.index;
               return (
@@ -159,7 +161,9 @@ function MonsterCard({
                     key={index}
                     className="text-xs"
                   >
-                    <span className="uppercase">{profName.slice(-3)}</span>
+                    <span className="uppercase text-slate-300">
+                      {profName.slice(-3)}
+                    </span>
                     {" +"}
                     {prof.value}
                   </li>
@@ -171,8 +175,8 @@ function MonsterCard({
 
         {/* HP */}
         <div className="">
-          <label htmlFor="hp">HP</label>
-          <div className="flex items-center">
+          {/* <label htmlFor="hp">HP</label> */}
+          <div className="flex items-center gap-2">
             <input
               id="hp"
               className="block w-12 h-6 text-center rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -235,7 +239,9 @@ function MonsterCard({
                 </button>
               </li>
             ))}
+            <button className="border border-slate-100 px-2 py-1 rounded-md text-xs hover:bg-slate-700 uppercase" onClick={() => onSetCondition(monster, "CLEAR")}>clear</button>
           </ul>
+          
         )}
       </div>
     </div>

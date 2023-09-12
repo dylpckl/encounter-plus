@@ -7,6 +7,8 @@ import rollInitiative from "@/lib/rollInitiative";
 import MonsterCard from "./MonsterCard";
 import useDebounce from "@/lib/hooks/useDebounce";
 
+import { ClockIcon, HeartIcon } from "@heroicons/react/24/outline";
+
 function filterMonsters(monsters, query) {
   query = query.toLowerCase();
   return monsters.filter((mon) =>
@@ -29,19 +31,22 @@ export default function Home() {
 
   useEffect(() => {
     const variables = { name: debouncedSearch };
-
+    let ignore = false;
     const fetchMonsters = async () => {
+      console.log("fetching");
       const res = await fetch("/api/monsters", {
         method: "POST",
         body: JSON.stringify({ variables: variables }),
       });
       const data = await res.json();
-      // console.log(data);
-      // return res.json();
       setMonsterResults(data);
     };
 
     fetchMonsters();
+
+    return () => {
+      ignore = true;
+    };
   }, [debouncedSearch]);
 
   function handleSearchChange(e) {
@@ -66,6 +71,7 @@ export default function Home() {
   function clearQuery() {
     // passed to SearchBar to enable clearing the input
     setQuery("");
+    setMonsterResults([]);
   }
 
   function handleAddActiveMonster(monster) {
@@ -194,17 +200,33 @@ export default function Home() {
   }
 
   function handleMonsterCondition(monster, condition) {
+    // find the monster index
     const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
+
     if (monsterIndex !== -1) {
       const updatedMonsters = [...activeMonsters];
       const currentConditionValue = monster.conditions[condition];
-      updatedMonsters[monsterIndex] = {
-        ...monster,
-        conditions: {
-          ...monster.conditions,
-          [condition]: !currentConditionValue,
-        },
-      };
+
+      if (condition === "CLEAR") {
+        const updatedConditions = {};
+        for (const key in monster.conditions) {
+          if (monster.conditions.hasOwnProperty(key)) {
+            updatedConditions[key] = false;
+          }
+        }
+        updatedMonsters[monsterIndex] = {
+          ...monster,
+          conditions: updatedConditions,
+        };
+      } else {
+        updatedMonsters[monsterIndex] = {
+          ...monster,
+          conditions: {
+            ...monster.conditions,
+            [condition]: !currentConditionValue,
+          },
+        };
+      }
 
       // Update the state with the new array
       setActiveMonsters(updatedMonsters);
@@ -294,11 +316,13 @@ export default function Home() {
         id="header"
         className="w-full bg-pink-600 "
       >
-        <h1 className="text-sm uppercase">Initiative</h1>
+        <h1 className="text-sm uppercase">combat tracker</h1>
         <div className="">
           <button onClick={() => setActiveMonsters([])}>clear</button>
           <span>round:</span>
           {roundCounter}
+          <ClockIcon className="h-6 w-6" />
+          <HeartIcon className="h-6 w-6" />
         </div>
 
         <div className="w-full">

@@ -34,6 +34,7 @@ export async function POST(request: Request) {
       headers: { "Content-Type": "application/json" },
       // body: JSON.stringify({ query }),
       body: JSON.stringify({ query: query, variables: variables }),
+      cache: "no-store",
     });
     const data = await res.json();
     console.log(data);
