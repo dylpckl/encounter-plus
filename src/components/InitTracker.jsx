@@ -1,13 +1,26 @@
 "use client";
-import { useState, useEffect } from "react";
+
+// External
+import { useState, useEffect, useRef } from "react";
 import { nanoid } from "nanoid";
+
+// Components
 import SearchBar from "@/components/SearchBar";
 import SearchResults from "@/components/SearchResults";
+import MonsterCard from "@/components/MonsterCard";
+
+// Utils
 import rollInitiative from "@/lib/rollInitiative";
-import MonsterCard from "./MonsterCard";
 import useDebounce from "@/lib/hooks/useDebounce";
 
-import { ClockIcon, HeartIcon } from "@heroicons/react/24/outline";
+// Icons
+import {
+  ClockIcon,
+  HeartIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  PlayIcon,
+} from "@heroicons/react/24/outline";
 
 function filterMonsters(monsters, query) {
   query = query.toLowerCase();
@@ -24,6 +37,13 @@ export default function Home() {
   const [roundCounter, setRoundCounter] = useState(1);
   const sortedMonsters = activeMonsters.sort((a, b) => b.init - a.init);
   const debouncedSearch = useDebounce(query);
+
+  // const [activeMonsterIndex, setActiveMonsterIndex] = useState(null);
+  const activeMonsterCardRef = useRef(null);
+  const activeMonsterIndex = activeMonsters.findIndex(
+    (monster) => monster.active === true
+  );
+  console.log("activeMonsterIndex:", activeMonsterIndex);
 
   // EVENT HANDLERS ------------------------------------------------------
   // These are sent down to child components as props
@@ -48,6 +68,16 @@ export default function Home() {
       ignore = true;
     };
   }, [debouncedSearch]);
+
+  useEffect(() => {
+    // Scroll the active monster into view when it changes
+    if (activeMonsterCardRef.current) {
+      activeMonsterCardRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, [activeMonsterIndex]);
 
   function handleSearchChange(e) {
     setQuery(e.target.value);
@@ -245,9 +275,17 @@ export default function Home() {
     }));
 
     setActiveMonsters(updatedMonsters);
+    // setActiveMonsterIndex(0); // Set the active monster index to 0
   }
 
   function nextTurn() {
+    console.log(activeMonsterCardRef);
+    if (activeMonsterCardRef.current) {
+      activeMonsterCardRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
     const activeIndex = activeMonsters.findIndex((monster) => monster.active);
 
     if (activeIndex !== -1) {
@@ -267,6 +305,7 @@ export default function Home() {
       // Check if the next turn starts a new round
       if (nextActiveIndex === 0) {
         setRoundCounter(roundCounter + 1);
+        // turnCounter = 1
       }
 
       sortedMonsters[nextActiveIndex].active = true;
@@ -319,8 +358,6 @@ export default function Home() {
         <h1 className="text-sm uppercase">combat tracker</h1>
         <div className="">
           <button onClick={() => setActiveMonsters([])}>clear</button>
-          <span>round:</span>
-          {roundCounter}
           <ClockIcon className="h-6 w-6" />
           <HeartIcon className="h-6 w-6" />
         </div>
@@ -343,9 +380,11 @@ export default function Home() {
       </div>
       <div className="overflow-y-auto h-full w-full">
         <ul className="w-full flex flex-col space-y-2">
-          {sortedMonsters.map((monster) => (
+          {sortedMonsters.map((monster, index) => (
             <li key={monster.id}>
+              <span>{index}</span>
               <MonsterCard
+                ref={index === activeMonsterIndex ? activeMonsterCardRef : null}
                 monster={monster}
                 onKill={handleKill}
                 onDelete={handleDeleteMonster}
@@ -358,9 +397,33 @@ export default function Home() {
       </div>
 
       <div className="flex w-full justify-between mt-auto">
-        <button onClick={startCombat}>start combat</button>
-        <button onClick={nextTurn}>next turn</button>
-        <button onClick={previousTurn}>previous turn</button>
+        <button
+          onClick={startCombat}
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-red-300"
+        >
+          <PlayIcon className="h-6 w-6" />
+        </button>
+
+        <div className="">
+          <span className="uppercase">round</span>
+          <span className="ml-2">{roundCounter}</span>
+          {/* {turnCounter} */}
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={previousTurn}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-red-300"
+          >
+            <ChevronUpIcon className="h-6 w-6" />
+          </button>
+          <button
+            onClick={nextTurn}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-red-300"
+          >
+            <ChevronDownIcon className="h-6 w-6" />
+          </button>
+        </div>
       </div>
     </div>
   );
