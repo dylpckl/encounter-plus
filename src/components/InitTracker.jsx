@@ -3,112 +3,9 @@ import { useState, useEffect } from "react";
 import { nanoid } from "nanoid";
 import SearchBar from "@/components/SearchBar";
 import SearchResults from "@/components/SearchResults";
-import ActiveMonsters from "@/components/ActiveMonsters";
 import rollInitiative from "@/lib/rollInitiative";
 import MonsterCard from "./MonsterCard";
-
-// const monsters = [
-//   {
-//     name: "Acolyte",
-//     dexterity: 17,
-//     armor_class: [
-//       {
-//         value: 13,
-//       },
-//     ],
-//     hit_points: 102,
-//   },
-//   {
-//     name: "Aboleth",
-//     dexterity: 17,
-//     armor_class: [
-//       {
-//         value: 13,
-//       },
-//     ],
-//     hit_points: 102,
-//   },
-//   {
-//     name: "Adult Black Dragon",
-//     dexterity: 17,
-//     armor_class: [
-//       {
-//         value: 13,
-//       },
-//     ],
-//     hit_points: 102,
-//   },
-//   {
-//     name: "Adult Blue Dragon",
-//     dexterity: 17,
-//     armor_class: [
-//       {
-//         value: 13,
-//       },
-//     ],
-//     hit_points: 102,
-//   },
-//   {
-//     name: "Adult Brass Dragon",
-//     dexterity: 17,
-//     armor_class: [
-//       {
-//         value: 13,
-//       },
-//     ],
-//     hit_points: 102,
-//   },
-//   {
-//     name: "Adult Copper Dragon",
-//     dexterity: 17,
-//     armor_class: [
-//       {
-//         value: 13,
-//       },
-//     ],
-//     hit_points: 102,
-//   },
-//   {
-//     name: "Adult Gold Dragon",
-//     dexterity: 17,
-//     armor_class: [
-//       {
-//         value: 13,
-//       },
-//     ],
-//     hit_points: 102,
-//   },
-//   {
-//     name: "Adult Bronze Dragon",
-//     dexterity: 17,
-//     armor_class: [
-//       {
-//         value: 13,
-//       },
-//     ],
-//     hit_points: 102,
-//   },
-//   {
-//     name: "Adult Green Dragon",
-//     dexterity: 17,
-//     armor_class: [
-//       {
-//         value: 13,
-//       },
-//     ],
-//     hit_points: 102,
-//   },
-//   {
-//     name: "Adult Red Dragon",
-//     dexterity: 17,
-//     armor_class: [
-//       {
-//         value: 13,
-//       },
-//     ],
-//     hit_points: 102,
-//   },
-// ];
+import useDebounce from "@/lib/hooks/useDebounce";
 
 function filterMonsters(monsters, query) {
   query = query.toLowerCase();
@@ -117,17 +14,6 @@ function filterMonsters(monsters, query) {
   );
 }
 
-// async function getMonsters() {
-//   const res = await fetch("http://localhost:3000/api/monsters", {
-//     method: "POST",
-//   });
-//   if (!res.ok) {
-//     throw new Error("failed to fetch monsters");
-//   }
-//   const monsters = await res.json();
-//   return monsters.data.data.monsters;
-// }
-
 export default function Home() {
   const [query, setQuery] = useState("");
   const [activeMonsters, setActiveMonsters] = useState([]);
@@ -135,26 +21,39 @@ export default function Home() {
   const [monsterResults, setMonsterResults] = useState([]);
   const [roundCounter, setRoundCounter] = useState(1);
   const sortedMonsters = activeMonsters.sort((a, b) => b.init - a.init);
-  // const monsters = await getMonsters();
-  // console.log(monsters);
-  // const [monsters, setMonsters] = useState([]);
+  const debouncedSearch = useDebounce(query);
 
   // EVENT HANDLERS ------------------------------------------------------
   // These are sent down to child components as props
   // ---------------------------------------------------------------------
-  function handleSearchChange(e) {
-    setQuery(e.target.value);
-    // console.log(query);
 
-    const variables = { name: query };
+  useEffect(() => {
+    const variables = { name: debouncedSearch };
 
-    // hit API with query
     const fetchMonsters = async () => {
       const res = await fetch("/api/monsters", {
         method: "POST",
         body: JSON.stringify({ variables: variables }),
       });
-      // if(res.status=)
+      const data = await res.json();
+      // console.log(data);
+      // return res.json();
+      setMonsterResults(data);
+    };
+
+    fetchMonsters();
+  }, [debouncedSearch]);
+
+  function handleSearchChange(e) {
+    setQuery(e.target.value);
+
+    const variables = { name: debouncedSearch };
+
+    const fetchMonsters = async () => {
+      const res = await fetch("/api/monsters", {
+        method: "POST",
+        body: JSON.stringify({ variables: variables }),
+      });
       const data = await res.json();
       // console.log(data);
       // return res.json();
@@ -169,34 +68,101 @@ export default function Home() {
     setQuery("");
   }
 
-  function handleMonsterActive(monster) {
-    // add to initiative
-    setActiveMonsters([
-      ...activeMonsters,
-      {
-        ...monster,
-        maxHP: monster.hit_points,
-        active: false,
-        init: rollInitiative(monster.dexterity),
-        id: nanoid(),
-        conditions: {
-          BLND: false,
-          CHRM: false,
-          DEAF: false,
-          FRGHT: false,
-          GRPL: false,
-          INCAP: false,
-          INVIS: false,
-          PRLZ: false,
-          PETR: false,
-          POIS: false,
-          PRNE: false,
-          REST: false,
-          STUN: false,
-          UNCON: false,
+  function handleAddActiveMonster(monster) {
+    // add monster to initiative
+    // 1. check if any activeMonsters already have the same name
+    // if no monster with the matching name already has "1" at the end, update the first occurrence to be "[name] 1"
+    // otherwise, update the first occurrence to be "[name] 1"
+    //
+
+    const existingMonsterIndex = activeMonsters.findIndex(
+      (activeMonster) => activeMonster.name === monster.name
+    );
+
+    // if (existingMonsterIndex !== -1) {
+    //   const updatedMonsters = [...activeMonsters];
+
+    //   if (updatedMonsters[existingMonsterIndex].name.endsWith('1')){
+
+    //   }
+    // }
+
+    if (existingMonsterIndex !== -1) {
+      // An existing monster with the same name was found
+      const updatedMonsters = [...activeMonsters];
+      updatedMonsters[existingMonsterIndex].name = getUniqueMonsterName(
+        monster.name
+      );
+
+      setActiveMonsters([
+        ...updatedMonsters,
+        {
+          ...monster,
+          maxHP: monster.hit_points,
+          active: false,
+          init: rollInitiative(monster.dexterity),
+          id: nanoid(),
+          conditions: {
+            BLND: false,
+            CHRM: false,
+            DEAF: false,
+            FRGHT: false,
+            GRPL: false,
+            INCAP: false,
+            INVIS: false,
+            PRLZ: false,
+            PETR: false,
+            POIS: false,
+            PRNE: false,
+            REST: false,
+            STUN: false,
+            UNCON: false,
+          },
         },
-      },
-    ]);
+      ]);
+    } else {
+      // No existing monster with the same name was found
+      setActiveMonsters([
+        ...activeMonsters,
+        {
+          ...monster,
+          maxHP: monster.hit_points,
+          active: false,
+          init: rollInitiative(monster.dexterity),
+          id: nanoid(),
+          conditions: {
+            BLND: false,
+            CHRM: false,
+            DEAF: false,
+            FRGHT: false,
+            GRPL: false,
+            INCAP: false,
+            INVIS: false,
+            PRLZ: false,
+            PETR: false,
+            POIS: false,
+            PRNE: false,
+            REST: false,
+            STUN: false,
+            UNCON: false,
+          },
+        },
+      ]);
+    }
+  }
+
+  function getUniqueMonsterName(baseName) {
+    let newName = baseName;
+    let count = 1;
+
+    while (
+      activeMonsters.some((activeMonster) => activeMonster.name === newName)
+    ) {
+      newName = `${baseName} ${count}`;
+      count++;
+    }
+
+    return newName;
   }
 
   function handleKill(monster) {
@@ -338,25 +304,20 @@ export default function Home() {
         <div className="w-full">
           <SearchBar
             query={query}
-            onChange={handleSearchChange}
+            onChange={setQuery}
+            // onChange={handleSearchChange}
             onClick={clearQuery}
           />
           {query.length > 0 && (
             <SearchResults
+              // monsters={debouncedSearchValue}
               monsters={monsterResults}
-              onChange={handleMonsterActive}
+              onChange={handleAddActiveMonster}
             />
           )}
         </div>
       </div>
-      <div className="overflow-y-auto h-full">
-        {/* <ActiveMonsters
-          monsters={activeMonsters}
-          // onChange={handleMonsterActive}
-        /> */}
-
-        {/* const sortedMonsters = monsters.sort((a, b) => b.init - a.init); */}
-
+      <div className="overflow-y-auto h-full w-full">
         <ul className="w-full flex flex-col space-y-2">
           {sortedMonsters.map((monster) => (
             <li key={monster.id}>
