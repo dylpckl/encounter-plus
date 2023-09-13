@@ -29,6 +29,20 @@ function filterMonsters(monsters, query) {
   );
 }
 
+function debounce(func, delay) {
+  let timerId;
+
+  return function (...args) {
+    const context = this;
+
+    clearTimeout(timerId);
+
+    timerId = setTimeout(() => {
+      func.apply(context, args);
+    }, delay);
+  };
+}
+
 export default function Home() {
   const [query, setQuery] = useState("");
   const [activeMonsters, setActiveMonsters] = useState([]);
@@ -37,7 +51,6 @@ export default function Home() {
   const [roundCounter, setRoundCounter] = useState(1);
   const sortedMonsters = activeMonsters.sort((a, b) => b.init - a.init);
   const debouncedSearch = useDebounce(query);
-
   // const [activeMonsterIndex, setActiveMonsterIndex] = useState(null);
   const activeMonsterCardRef = useRef(null);
   const activeMonsterIndex = activeMonsters.findIndex(
@@ -49,28 +62,25 @@ export default function Home() {
   // These are sent down to child components as props
   // ---------------------------------------------------------------------
 
-  useEffect(() => {
-    const variables = { name: debouncedSearch };
-    let ignore = false;
-    const fetchMonsters = async () => {
-      console.log("fetching");
-
-      const res = await fetch("/api/monsters", {
-        method: "POST",
-        body: JSON.stringify({ variables: variables }),
-      });
-
-      const data = await res.json();
-
-      if (!ignore) {
-        setMonsterResults(data);
-      }
-    };
-    fetchMonsters();
-    return () => {
-      ignore = true;
-    };
-  }, [debouncedSearch]);
+  // useEffect(() => {
+  //   const variables = { name: debouncedSearch };
+  //   let ignore = false;
+  //   const fetchMonsters = async () => {
+  //     console.log("fetching");
+  //     const res = await fetch("/api/monsters", {
+  //       method: "POST",
+  //       body: JSON.stringify({ variables: variables }),
+  //     });
+  //     const data = await res.json();
+  //     if (!ignore) {
+  //       setMonsterResults(data);
+  //     }
+  //   };
+  //   fetchMonsters();
+  //   return () => {
+  //     ignore = true;
+  //   };
+  // }, [debouncedSearch]);
 
   useEffect(() => {
     // Scroll the active monster into view when it changes
@@ -82,23 +92,45 @@ export default function Home() {
     }
   }, [activeMonsterIndex]);
 
+  const fetchMonsters = async (value) => {
+    const variables = { name: value };
+    const res = await fetch("/api/monsters", {
+      method: "POST",
+      body: JSON.stringify({ variables: variables }),
+    });
+    const data = await res.json();
+    setMonsterResults(data);
+  };
+
+  // useEffect(() => {
+  //   debouncedFetchMonsters(query);
+  // }, [query]);
+
+  useEffect(() => {
+    if (query) {
+      fetchMonsters(query);
+    } else {
+      setMonsterResults([]);
+    }
+  }, [debouncedSearch]);
+
+  // useEffect(() => {
+  //   if (query) {
+  //     debouncedInputSearch(query);
+  //   } else {
+  //     setMonsterResults([]);
+  //   }
+  // }, [query]);
+
   function handleSearchChange(e) {
     setQuery(e.target.value);
 
-    const variables = { name: debouncedSearch };
-
-    const fetchMonsters = async () => {
-      const res = await fetch("/api/monsters", {
-        method: "POST",
-        body: JSON.stringify({ variables: variables }),
-      });
-      const data = await res.json();
-      // console.log(data);
-      // return res.json();
-      setMonsterResults(data);
-    };
-
-    fetchMonsters();
+    // const debouncedFetchMonsters = debounce(() => fetchMonsters(query), 2000);
+    // if (query) {
+    //   debouncedFetchMonsters();
+    // } else {
+    //   setMonsterResults([]);
+    // }
   }
 
   function clearQuery() {
@@ -368,8 +400,8 @@ export default function Home() {
         <div className="w-full">
           <SearchBar
             query={query}
-            onChange={setQuery}
-            // onChange={handleSearchChange}
+            // onChange={setQuery}
+            onChange={handleSearchChange}
             onClick={clearQuery}
           />
           {query.length > 0 && (

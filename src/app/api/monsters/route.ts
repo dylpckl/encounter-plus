@@ -4,11 +4,12 @@ export async function POST(request: Request) {
   const requestBody = await request.json();
   const name = requestBody.variables.name;
   const variables = { name: name };
-  console.log(requestBody);
+
+  // promise.all
 
   const query = `
     query Monsters($name: String) {
-      monsters(limit: 50, name: $name) {
+      monsters(limit: 500, name: $name) {
         name  
         dexterity
         armor_class {

@@ -7,7 +7,7 @@ export default function SearchBar({ query, onChange, onClick }) {
         type="text"
         value={query}
         placeholder="Search for a monster..."
-        onChange={(e) => onChange(e.target.value)} //handleSearchChange
+        onChange={(e) => onChange(e)} //handleSearchChange
         // onChange={onChange} //handleSearchChange
         className="text-black"
       />
