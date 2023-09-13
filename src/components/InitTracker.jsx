@@ -43,7 +43,7 @@ export default function Home() {
   const activeMonsterIndex = activeMonsters.findIndex(
     (monster) => monster.active === true
   );
-  console.log("activeMonsterIndex:", activeMonsterIndex);
+  // console.log("activeMonsterIndex:", activeMonsterIndex);
 
   // EVENT HANDLERS ------------------------------------------------------
   // These are sent down to child components as props
@@ -54,16 +54,19 @@ export default function Home() {
     let ignore = false;
     const fetchMonsters = async () => {
       console.log("fetching");
+
       const res = await fetch("/api/monsters", {
         method: "POST",
         body: JSON.stringify({ variables: variables }),
       });
+
       const data = await res.json();
-      setMonsterResults(data);
+
+      if (!ignore) {
+        setMonsterResults(data);
+      }
     };
-
     fetchMonsters();
-
     return () => {
       ignore = true;
     };
@@ -382,7 +385,7 @@ export default function Home() {
         <ul className="w-full flex flex-col space-y-2">
           {sortedMonsters.map((monster, index) => (
             <li key={monster.id}>
-              <span>{index}</span>
+              {/* <span>{index}</span> */}
               <MonsterCard
                 ref={index === activeMonsterIndex ? activeMonsterCardRef : null}
                 monster={monster}
