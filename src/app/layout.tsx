@@ -19,7 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`h-screen grid grid-cols-12 grid-rows-[48px_repeat(5,_1fr)] ${inter.className}`}
+        className={`h-screen grid grid-cols-12 grid-rows-[48px_repeat(5,_1fr)] auto-rows-min ${inter.className}`}
       >
         <SiteHeader />
         {children}
