@@ -8,6 +8,7 @@ import { nanoid } from "nanoid";
 import SearchBar from "@/components/SearchBar";
 import SearchResults from "@/components/SearchResults";
 import MonsterCard from "@/components/MonsterCard";
+import HitPointPopover from "@/components/HitPointPopover";
 
 // Utils
 import rollInitiative from "@/lib/rollInitiative";
@@ -46,6 +47,7 @@ function debounce(func, delay) {
 export default function Home() {
   const [query, setQuery] = useState("");
   const [activeMonsters, setActiveMonsters] = useState([]);
+  const [showHPPopover, setShowHPPopover] = useState(false);
   // const results = filterMonsters(monsters, query);
   const [monsterResults, setMonsterResults] = useState([]);
   const [roundCounter, setRoundCounter] = useState(1);
@@ -81,6 +83,10 @@ export default function Home() {
   //     ignore = true;
   //   };
   // }, [debouncedSearch]);
+
+  function open() {
+    setShowHPPopover(true);
+  }
 
   useEffect(() => {
     // Scroll the active monster into view when it changes
@@ -413,7 +419,7 @@ export default function Home() {
           )}
         </div>
       </div>
-      <div className="overflow-y-auto h-full w-full">
+      <div className="overflow-y-auto overflow-x-hidden h-full w-full">
         <ul className="w-full flex flex-col space-y-2">
           {sortedMonsters.map((monster, index) => (
             <li key={monster.id}>
@@ -425,7 +431,9 @@ export default function Home() {
                 onDelete={handleDeleteMonster}
                 onInitChange={handleMonsterInitChange}
                 onSetCondition={handleMonsterCondition}
+                onOpenHPPopover={setShowHPPopover}
               />
+              {/* <HitPointPopover /> */}
             </li>
           ))}
         </ul>

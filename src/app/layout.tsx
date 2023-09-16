@@ -2,6 +2,8 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 
+import SiteHeader from "@/components/SiteHeader";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -19,7 +21,7 @@ export default function RootLayout({
       <body
         className={`h-screen grid grid-cols-12 grid-rows-[48px_repeat(5,_1fr)] ${inter.className}`}
       >
-        <header className="w-full col-span-full bg-slate-400 h-12"></header>
+        <SiteHeader />
         {children}
       </body>
     </html>
