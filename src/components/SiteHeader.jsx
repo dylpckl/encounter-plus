@@ -2,6 +2,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
+import useOnClickOutside from "@/lib/hooks/useOnClickOutside";
+
 export default function SiteHeader() {
   const [SidebarOpen, setSidebarOpen] = useState(false);
   const sidebarRef = useRef(null);
@@ -23,19 +25,21 @@ export default function SiteHeader() {
     );
   };
 
-  // Close Sidebar when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
-        setSidebarOpen(false);
-      }
-    };
+  useOnClickOutside(sidebarRef, () => setSidebarOpen(false));
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  // Close Sidebar when clicking outside
+  // useEffect(() => {
+  //   const handleClickOutside = (e) => {
+  //     if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
+  //       setSidebarOpen(false);
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, []);
 
   return (
     <>
