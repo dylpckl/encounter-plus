@@ -37,6 +37,7 @@ function classNames(...classes) {
 export default function Home() {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [managePartyOpen, setManagePartyOpen] = useState(false);
   // const [partyModalIsOpen, setPartyModalIsOpen] = useState(false);
 
   const filteredProjects =
@@ -221,13 +222,78 @@ export default function Home() {
     );
   };
 
+  const ManageParty = () => {
+    return (
+      <Transition.Root
+        show={managePartyOpen}
+        as={Fragment}
+        afterLeave={() => setQuery("")}
+        appear
+      >
+        <Dialog
+          as="div"
+          className="relative z-10"
+          onClose={setManagePartyOpen}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-25 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 w-screen overflow-y-auto p-4 sm:p-6 md:p-20">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="mx-auto max-w-xl transform rounded-xl bg-white p-2 shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
+                <div>
+                  <h2>manage party</h2>
+                  <div className="flex">
+                    <div className="rounded-md px-3 pb-1.5 pt-2.5 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
+                      <label
+                        htmlFor="name"
+                        className="block text-xs font-medium text-gray-900"
+                      >
+                        Name
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        id="name"
+                        className="block w-full border-0 p-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                        placeholder="Jane Smith"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </Dialog>
+      </Transition.Root>
+    );
+  };
+
   return (
     <>
       <CommandPalette />
+      <ManageParty />
       <div className="bg-sky-600 absolute top-12 z-20 h-6 col-span-full">
         <button
           className="h-6"
-          onClick={() => setOpen(true)}
+          onClick={() => setManagePartyOpen(true)}
         >
           manage party
         </button>
