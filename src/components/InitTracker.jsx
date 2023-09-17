@@ -1,8 +1,17 @@
 "use client";
 
 // External
-import { useState, useEffect, useRef } from "react";
+import {
+  Fragment,
+  useState,
+  useEffect,
+  useRef,
+  forwardRef,
+  Suspense,
+} from "react";
 import { nanoid } from "nanoid";
+import { Dialog, Transition } from "@headlessui/react";
+import clsx from "clsx";
 
 // Components
 import SearchBar from "@/components/SearchBar";
@@ -46,10 +55,12 @@ function debounce(func, delay) {
 
 export default function Home() {
   const [query, setQuery] = useState("");
+  const [addMonstersOpen, setAddMonstersOpen] = useState(false);
   const [activeMonsters, setActiveMonsters] = useState([]);
   const [showHPPopover, setShowHPPopover] = useState(false);
   // const results = filterMonsters(monsters, query);
   const [monsterResults, setMonsterResults] = useState([]);
+  const [monstersToAdd, setMonstersToAdd] = useState([]);
   const [roundCounter, setRoundCounter] = useState(1);
   const sortedMonsters = activeMonsters.sort((a, b) => b.init - a.init);
   const debouncedSearch = useDebounce(query);
@@ -64,30 +75,194 @@ export default function Home() {
   // These are sent down to child components as props
   // ---------------------------------------------------------------------
 
-  // useEffect(() => {
-  //   const variables = { name: debouncedSearch };
-  //   let ignore = false;
-  //   const fetchMonsters = async () => {
-  //     console.log("fetching");
-  //     const res = await fetch("/api/monsters", {
-  //       method: "POST",
-  //       body: JSON.stringify({ variables: variables }),
-  //     });
-  //     const data = await res.json();
-  //     if (!ignore) {
-  //       setMonsterResults(data);
-  //     }
-  //   };
-  //   fetchMonsters();
-  //   return () => {
-  //     ignore = true;
-  //   };
-  // }, [debouncedSearch]);
+  const SearchInput = forwardRef(function SearchInput(
+    { autocomplete, autocompleteState, onClose },
+    inputRef
+  ) {
+    return (
+      <div className="group relative flex h-12">
+        {/* <SearchIcon className="pointer-events-none absolute left-3 top-0 h-full w-5 stroke-zinc-500" /> */}
+        <input
+          ref={inputRef}
+          className={clsx(
+            "flex-auto appearance-none bg-transparent pl-10 text-zinc-900 outline-none placeholder:text-zinc-500 focus:w-full focus:flex-none dark:text-white sm:text-sm [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden",
+            autocompleteState.status === "stalled" ? "pr-11" : "pr-4"
+          )}
+        />
+      </div>
+    );
+  });
 
-  function open() {
-    setShowHPPopover(true);
+  const AddMonster = () => {
+    return (
+      <Suspense fallback={null}>
+        <Transition.Root
+          show={addMonstersOpen}
+          as={Fragment}
+          appear
+        >
+          <Dialog
+            as="div"
+            className="relative z-10"
+            onClose={() => setAddMonstersOpen(false)}
+          >
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <div className="fixed inset-0 bg-gray-500 bg-opacity-25 transition-opacity" />
+            </Transition.Child>
+
+            <div className="fixed inset-0 z-10 w-screen overflow-y-auto p-4 sm:p-6 md:p-20">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="mx-auto max-w-xl transform rounded-xl bg-white p-6 shadow-2xl ring-1 ring-black ring-opacity-5 transition-all text-gray-900">
+                  <Dialog.Title
+                    as="h2"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                  >
+                    Add Monsters
+                  </Dialog.Title>
+                  <div className="mt-2">
+                    <SearchBar
+                      query={query}
+                      // onChange={setQuery}
+                      onChange={handleSearchChange}
+                      onClick={clearQuery}
+                    />
+                    {query.length > 0 && (
+                      <SearchResults
+                        // monsters={debouncedSearchValue}
+                        monsters={monsterResults}
+                        onChange={batchMonsters}
+                        // onChange={handleAddMonster}
+                        // onChange={handleAddActiveMonster}
+                      />
+                    )}
+                    <ul>
+                      {monstersToAdd.map((monster, idx) => (
+                        <li
+                          key={idx}
+                          // onChange={handleAddMonster}
+                        >
+                          {monster.name}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      onClick={addActiveMonsters}
+                      // onClick={() => setAddMonstersOpen(false)}
+                    >
+                      Got it, thanks!
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </Dialog>
+        </Transition.Root>
+      </Suspense>
+    );
+    // <Transition.Root
+    //   show={addMonstersOpen}
+    //   as={Fragment}
+    //   // afterLeave={() => autocomplete.setQuery("")}
+    // >
+    //   <Dialog
+    //     onClose={setAddMonstersOpen}
+    //     className="fixed inset-0 z-50"
+    //   >
+    //     <Transition.Child
+    //       as={Fragment}
+    //       enter="ease-out duration-300"
+    //       enterFrom="opacity-0"
+    //       enterTo="opacity-100"
+    //       leave="ease-in duration-200"
+    //       leaveFrom="opacity-100"
+    //       leaveTo="opacity-0"
+    //     >
+    //       <div className="fixed inset-0 bg-zinc-400/25 backdrop-blur-sm dark:bg-black/40" />
+    //     </Transition.Child>
+
+    //     <div className="fixed inset-0 overflow-y-auto px-4 py-4 sm:px-6 sm:py-20 md:py-32 lg:px-8 lg:py-[15vh]">
+    //       <Transition.Child
+    //         as={Fragment}
+    //         enter="ease-out duration-300"
+    //         enterFrom="opacity-0 scale-95"
+    //         enterTo="opacity-100 scale-100"
+    //         leave="ease-in duration-200"
+    //         leaveFrom="opacity-100 scale-100"
+    //         leaveTo="opacity-0 scale-95"
+    //       >
+    //         <Dialog.Panel className="mx-auto transform-gpu overflow-hidden rounded-lg bg-zinc-50 shadow-xl ring-1 ring-zinc-900/7.5 dark:bg-zinc-900 dark:ring-zinc-800 sm:max-w-xl">
+    //           <div>
+    //             <SearchInput
+    //               // ref={inputRef}
+    //               onClose={() => setAddMonstersOpen(false)}
+    //             />
+    //           </div>
+    //         </Dialog.Panel>
+    //       </Transition.Child>
+    //     </div>
+    //   </Dialog>
+    // </Transition.Root>;
+  };
+
+  function batchMonsters(monster) {
+    setMonstersToAdd([...monstersToAdd, monster]);
   }
 
+  function addActiveMonsters() {
+    setAddMonstersOpen(false);
+    console.log(monstersToAdd);
+
+    monstersToAdd.map((monster) => {
+      setActiveMonsters((prev) => [
+        ...prev,
+
+        {
+          ...monster,
+          maxHP: monster.hit_points,
+          active: false,
+          init: rollInitiative(monster.dexterity),
+          id: nanoid(),
+          conditions: {
+            BLND: false,
+            CHRM: false,
+            DEAF: false,
+            FRGHT: false,
+            GRPL: false,
+            INCAP: false,
+            INVIS: false,
+            PRLZ: false,
+            PETR: false,
+            POIS: false,
+            PRNE: false,
+            REST: false,
+            STUN: false,
+            UNCON: false,
+          },
+        },
+      ]);
+    });
+  }
   useEffect(() => {
     // Scroll the active monster into view when it changes
     if (activeMonsterCardRef.current) {
@@ -392,6 +567,7 @@ export default function Home() {
 
   return (
     <div className="bg-slate-600 rounded-lg col-span-4 row-span-6 m-5 p-3 flex flex-col items-center relative">
+      <AddMonster />
       <div
         id="header"
         className="w-full bg-pink-600 "
@@ -401,9 +577,15 @@ export default function Home() {
           <button onClick={() => setActiveMonsters([])}>clear</button>
           <ClockIcon className="h-6 w-6" />
           <HeartIcon className="h-6 w-6" />
+          <button
+            className="h-6"
+            onClick={() => setAddMonstersOpen(true)}
+          >
+            add monsters
+          </button>
         </div>
 
-        <div className="w-full">
+        {/* <div className="w-full">
           <SearchBar
             query={query}
             // onChange={setQuery}
@@ -417,7 +599,7 @@ export default function Home() {
               onChange={handleAddActiveMonster}
             />
           )}
-        </div>
+        </div> */}
       </div>
       <div className="overflow-y-auto overflow-x-hidden h-full w-full">
         <ul className="w-full flex flex-col space-y-2">

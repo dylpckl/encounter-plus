@@ -38,7 +38,7 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [managePartyOpen, setManagePartyOpen] = useState(false);
-  // const [partyModalIsOpen, setPartyModalIsOpen] = useState(false);
+  const [addMonstersOpen, setAddMonstersOpen] = useState(false);
 
   const filteredProjects =
     query === ""
@@ -227,13 +227,12 @@ export default function Home() {
       <Transition.Root
         show={managePartyOpen}
         as={Fragment}
-        afterLeave={() => setQuery("")}
         appear
       >
         <Dialog
           as="div"
           className="relative z-10"
-          onClose={setManagePartyOpen}
+          onClose={() => setManagePartyOpen(false)}
         >
           <Transition.Child
             as={Fragment}
@@ -257,16 +256,31 @@ export default function Home() {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="mx-auto max-w-xl transform rounded-xl bg-white p-2 shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
+              <Dialog.Panel className="mx-auto max-w-xl transform rounded-xl bg-white p-6 shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
                 <div>
-                  <h2>manage party</h2>
-                  <div className="flex">
+                  <h2 className="text-gray-900">manage party</h2>
+                  <div className="flex gap-4">
                     <div className="rounded-md px-3 pb-1.5 pt-2.5 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
                       <label
                         htmlFor="name"
                         className="block text-xs font-medium text-gray-900"
                       >
-                        Name
+                        Character Name
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        id="name"
+                        className="block w-full border-0 p-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                        placeholder="Jane Smith"
+                      />
+                    </div>
+                    <div className="rounded-md px-3 pb-1.5 pt-2.5 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
+                      <label
+                        htmlFor="name"
+                        className="block text-xs font-medium text-gray-900"
+                      >
+                        Armor Class
                       </label>
                       <input
                         type="text"
@@ -286,10 +300,76 @@ export default function Home() {
     );
   };
 
+  const AddMonster = () => {
+    return (
+      <Transition.Root
+        show={addMonstersOpen}
+        as={Fragment}
+        appear
+      >
+        <Dialog
+          as="div"
+          className="relative z-10"
+          onClose={() => setAddMonstersOpen(false)}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-25 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 w-screen overflow-y-auto p-4 sm:p-6 md:p-20">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Dialog.Panel className="mx-auto max-w-xl transform rounded-xl bg-white p-6 shadow-2xl ring-1 ring-black ring-opacity-5 transition-all text-gray-900">
+                <Dialog.Title
+                  as="h2"
+                  className="text-lg font-medium leading-6 text-gray-900"
+                >
+                  Add Monsters
+                </Dialog.Title>
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500">
+                    Your payment has been successfully submitted. We’ve sent you
+                    an email with all of the details of your order.
+                  </p>
+                </div>
+
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    onClick={() => setAddMonstersOpen(false)}
+                  >
+                    Got it, thanks!
+                  </button>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </Dialog>
+      </Transition.Root>
+    );
+  };
+
   return (
     <>
       <CommandPalette />
       <ManageParty />
+      {/* <AddMonster /> */}
       <div className="bg-sky-600 absolute top-12 z-20 h-6 col-span-full">
         <button
           className="h-6"
@@ -297,6 +377,12 @@ export default function Home() {
         >
           manage party
         </button>
+        {/* <button
+          className="h-6"
+          onClick={() => setAddMonstersOpen(true)}
+        >
+          add monsters
+        </button> */}
       </div>
       <InitTracker />
       <Encounters />
