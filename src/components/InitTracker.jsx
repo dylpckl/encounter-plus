@@ -10,7 +10,7 @@ import {
   Suspense,
 } from "react";
 import { nanoid } from "nanoid";
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, Transition, Switch } from "@headlessui/react";
 import clsx from "clsx";
 
 // Components
@@ -30,6 +30,7 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   PlayIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 
 function filterMonsters(monsters, query) {
@@ -53,27 +54,121 @@ function debounce(func, delay) {
   };
 }
 
+function classNames(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
+
 export default function Home() {
+  // State
   const [query, setQuery] = useState("");
   const [addMonstersOpen, setAddMonstersOpen] = useState(false);
   const [activeMonsters, setActiveMonsters] = useState([]);
   const [showHPPopover, setShowHPPopover] = useState(false);
-  // const results = filterMonsters(monsters, query);
   const [monsterResults, setMonsterResults] = useState([]);
   const [monstersToAdd, setMonstersToAdd] = useState([]);
   const [roundCounter, setRoundCounter] = useState(1);
+
+  const [combatActive, setCombatActive] = useState(false);
+
   const sortedMonsters = activeMonsters.sort((a, b) => b.init - a.init);
   const debouncedSearch = useDebounce(query);
-  // const [activeMonsterIndex, setActiveMonsterIndex] = useState(null);
+
   const activeMonsterCardRef = useRef(null);
+
+  const completeButtonRef = useRef(null);
+
   const activeMonsterIndex = activeMonsters.findIndex(
     (monster) => monster.active === true
   );
-  // console.log("activeMonsterIndex:", activeMonsterIndex);
 
   // EVENT HANDLERS ------------------------------------------------------
   // These are sent down to child components as props
   // ---------------------------------------------------------------------
+
+  function toggleCombat() {
+    if (combatActive) {
+      setCombatActive(false);
+    } else {
+      setCombatActive(true);
+    }
+
+    const sortedMonsters = activeMonsters
+      .slice()
+      .sort((a, b) => b.init - a.init);
+    console.log(sortedMonsters);
+    // Mark the monster with the highest "init" value as active
+    const updatedMonsters = sortedMonsters.map((monster, index) => ({
+      ...monster,
+      active: index === 0, // Set the first monster as active
+    }));
+
+    setActiveMonsters(updatedMonsters);
+    // setCombatActive(true);
+    // setActiveMonsterIndex(0); // Set the active monster index to 0
+  }
+
+  const CombatSwitch = () => {
+    return (
+      <Switch
+        checked={combatActive}
+        onChange={toggleCombat}
+        // onChange={setCombatActive}
+        className={classNames(
+          combatActive ? "bg-indigo-600" : "bg-gray-200",
+          "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
+        )}
+      >
+        <span className="sr-only">Use setting</span>
+        <span
+          className={classNames(
+            combatActive ? "translate-x-5" : "translate-x-0",
+            "pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+          )}
+        >
+          <span
+            className={classNames(
+              combatActive
+                ? "opacity-0 duration-100 ease-out"
+                : "opacity-100 duration-200 ease-in",
+              "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+            )}
+            aria-hidden="true"
+          >
+            <svg
+              className="h-3 w-3 text-gray-400"
+              fill="none"
+              viewBox="0 0 12 12"
+            >
+              <path
+                d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+          <span
+            className={classNames(
+              combatActive
+                ? "opacity-100 duration-200 ease-in"
+                : "opacity-0 duration-100 ease-out",
+              "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+            )}
+            aria-hidden="true"
+          >
+            <svg
+              className="h-3 w-3 text-indigo-600"
+              fill="currentColor"
+              viewBox="0 0 12 12"
+            >
+              <path d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z" />
+            </svg>
+          </span>
+        </span>
+      </Switch>
+    );
+  };
 
   const SearchInput = forwardRef(function SearchInput(
     { autocomplete, autocompleteState, onClose },
@@ -99,9 +194,10 @@ export default function Home() {
         <Transition.Root
           show={addMonstersOpen}
           as={Fragment}
-          appear
+          // appear
         >
           <Dialog
+            initialFocus={completeButtonRef}
             as="div"
             className="relative z-10"
             onClose={() => setAddMonstersOpen(false)}
@@ -129,42 +225,66 @@ export default function Home() {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel className="mx-auto max-w-xl transform rounded-xl bg-white p-6 shadow-2xl ring-1 ring-black ring-opacity-5 transition-all text-gray-900">
+                  <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
+                    <button
+                      type="button"
+                      className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      onClick={() => setOpen(false)}
+                    >
+                      <span className="sr-only">Close</span>
+                      <XMarkIcon
+                        className="h-6 w-6"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  </div>
                   <Dialog.Title
                     as="h2"
                     className="text-lg font-medium leading-6 text-gray-900"
                   >
                     Add Monsters
                   </Dialog.Title>
-                  <div className="mt-2">
-                    <SearchBar
-                      query={query}
-                      // onChange={setQuery}
-                      onChange={handleSearchChange}
-                      onClick={clearQuery}
-                    />
-                    {query.length > 0 && (
-                      <SearchResults
-                        // monsters={debouncedSearchValue}
-                        monsters={monsterResults}
-                        onChange={batchMonsters}
-                        // onChange={handleAddMonster}
-                        // onChange={handleAddActiveMonster}
+                  <div className="flex">
+                    <div className="w-1/2 mt-2">
+                      <SearchBar
+                        query={query}
+                        // onChange={setQuery}
+                        onChange={handleSearchChange}
+                        onClick={clearQuery}
                       />
-                    )}
-                    <ul>
-                      {monstersToAdd.map((monster, idx) => (
-                        <li
-                          key={idx}
+                      {query.length > 0 && (
+                        <SearchResults
+                          // monsters={debouncedSearchValue}
+                          monsters={monsterResults}
+                          onChange={batchMonsters}
                           // onChange={handleAddMonster}
-                        >
-                          {monster.name}
-                        </li>
-                      ))}
-                    </ul>
+                          // onChange={handleAddActiveMonster}
+                        />
+                      )}
+                      <ul>
+                        {monstersToAdd.map((monster, idx) => (
+                          <li
+                            key={idx}
+                            // onChange={handleAddMonster}
+                          >
+                            {monster.name}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="w-1/2 bg-sky-500">
+                      <ul>
+                        {activeMonsters.map((monster, idx) => (
+                          <li key={idx}>{monster.name}</li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
 
                   <div className="mt-4">
                     <button
+                      ref={completeButtonRef}
                       type="button"
                       className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                       onClick={addActiveMonsters}
@@ -231,8 +351,6 @@ export default function Home() {
 
   function addActiveMonsters() {
     setAddMonstersOpen(false);
-    console.log(monstersToAdd);
-
     monstersToAdd.map((monster) => {
       setActiveMonsters((prev) => [
         ...prev,
@@ -262,9 +380,11 @@ export default function Home() {
         },
       ]);
     });
+    setMonstersToAdd([]);
   }
+
+  // Scroll the active monster into view when it changes
   useEffect(() => {
-    // Scroll the active monster into view when it changes
     if (activeMonsterCardRef.current) {
       activeMonsterCardRef.current.scrollIntoView({
         behavior: "smooth",
@@ -491,6 +611,7 @@ export default function Home() {
     }));
 
     setActiveMonsters(updatedMonsters);
+    setCombatActive(true);
     // setActiveMonsterIndex(0); // Set the active monster index to 0
   }
 
@@ -566,14 +687,15 @@ export default function Home() {
   }
 
   return (
-    <div className="bg-slate-600 rounded-lg col-span-4 row-span-6 m-5 p-3 flex flex-col items-center relative">
+    <div className="bg-slate-600 rounded-lg col-span-4 row-span-6 m-5 flex flex-col items-center relative">
       <AddMonster />
+      {/* Header */}
       <div
         id="header"
-        className="w-full bg-pink-600 "
+        className="w-full bg-pink-600 border-b border-slate-200 px-3 py-4"
       >
         <h1 className="text-sm uppercase">combat tracker</h1>
-        <div className="">
+        {/* <div className="">
           <button onClick={() => setActiveMonsters([])}>clear</button>
           <ClockIcon className="h-6 w-6" />
           <HeartIcon className="h-6 w-6" />
@@ -583,25 +705,35 @@ export default function Home() {
           >
             add monsters
           </button>
-        </div>
-
-        {/* <div className="w-full">
-          <SearchBar
-            query={query}
-            // onChange={setQuery}
-            onChange={handleSearchChange}
-            onClick={clearQuery}
-          />
-          {query.length > 0 && (
-            <SearchResults
-              // monsters={debouncedSearchValue}
-              monsters={monsterResults}
-              onChange={handleAddActiveMonster}
-            />
-          )}
         </div> */}
+        <CombatSwitch />
+        {/* Button Group */}
+        <span className="isolate inline-flex rounded-md shadow-sm">
+          <button
+            type="button"
+            className="relative inline-flex items-center rounded-l-md bg-white px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+          >
+            <span className="sr-only">Previous</span>
+            <ChevronDownIcon
+              className="h-5 w-5"
+              aria-hidden="true"
+            />
+          </button>
+          <button
+            type="button"
+            className="relative -ml-px inline-flex items-center rounded-r-md bg-white px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+          >
+            <span className="sr-only">Next</span>
+            <ChevronUpIcon
+              className="h-5 w-5"
+              aria-hidden="true"
+            />
+          </button>
+        </span>
       </div>
-      <div className="overflow-y-auto overflow-x-hidden h-full w-full">
+
+      {/* Body */}
+      <div className="overflow-y-auto overflow-x-hidden h-full w-full p-3">
         <ul className="w-full flex flex-col space-y-2">
           {sortedMonsters.map((monster, index) => (
             <li key={monster.id}>

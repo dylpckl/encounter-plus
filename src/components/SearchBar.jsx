@@ -1,5 +1,7 @@
 "use client";
 
+import { ForwardRef } from "react";
+
 export default function SearchBar({ query, onChange, onClick }) {
   return (
     <div className="relative rounded-md">
@@ -20,3 +22,5 @@ export default function SearchBar({ query, onChange, onClick }) {
     </div>
   );
 }
+
+// export default SearchBar
