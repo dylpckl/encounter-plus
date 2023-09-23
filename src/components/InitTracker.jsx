@@ -31,7 +31,9 @@ import {
   ChevronUpIcon,
   PlayIcon,
   XMarkIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
+import { type } from "os";
 
 function filterMonsters(monsters, query) {
   query = query.toLowerCase();
@@ -61,14 +63,22 @@ function classNames(...classes) {
 export default function Home() {
   // State
   const [query, setQuery] = useState("");
-  const [addMonstersOpen, setAddMonstersOpen] = useState(false);
-  const [activeMonsters, setActiveMonsters] = useState([]);
+  // const [addMonstersOpen, setAddMonstersOpen] = useState(false);
+  const [manageCharactersOpen, setManageCharactersOpen] = useState(false);
+  const [activeMonsters, setActiveMonsters] = useState(() => {
+    return JSON.parse(localStorage.getItem("activeMonsters")) || [];
+  });
   const [showHPPopover, setShowHPPopover] = useState(false);
   const [monsterResults, setMonsterResults] = useState([]);
   const [monstersToAdd, setMonstersToAdd] = useState([]);
-  const [roundCounter, setRoundCounter] = useState(1);
+  const [roundCtr, setRoundCounter] = useState(() => {
+    return JSON.parse(localStorage.getItem("roundCtr")) || 1;
+  });
 
-  const [combatActive, setCombatActive] = useState(false);
+  const [addMonstersOpen, setAddMonstersOpen] = useState(false);
+  const [combatActive, setCombatActive] = useState(() => {
+    return JSON.parse(localStorage.getItem("combatActive") === true || false);
+  });
 
   const sortedMonsters = activeMonsters.sort((a, b) => b.init - a.init);
   const debouncedSearch = useDebounce(query);
@@ -80,6 +90,38 @@ export default function Home() {
   const activeMonsterIndex = activeMonsters.findIndex(
     (monster) => monster.active === true
   );
+
+  // useEffect(() => {
+  //   if (typeof window !== "undefined" && window.localStorage) {
+  //     let storedMonsters = JSON.parse(localStorage.getItem("activeMonsters"));
+  //     setActiveMonsters(storedMonsters);
+  //   }
+  // }, []);
+
+  // https://articles.wesionary.team/using-localstorage-with-next-js-a-beginners-guide-7fc4f8bfd9dc
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.localStorage) {
+      localStorage.setItem("activeMonsters", JSON.stringify(activeMonsters));
+      localStorage.setItem("combatActive", JSON.stringify(combatActive));
+      // setActiveMonsters(activeMonsters);
+    }
+  }, [activeMonsters, combatActive]);
+
+  function handleSave() {
+    console.log(window.localStorage);
+    if (typeof window !== "undefined" && window.localStorage) {
+      localStorage.setItem("activeMonsters", JSON.stringify(activeMonsters));
+      localStorage.setItem("roundCtr", JSON.stringify(roundCtr));
+    }
+  }
+
+  function getData() {
+    console.log(JSON.parse(window.localStorage.getItem("activeMonsters")));
+    if (typeof window !== "undefined" && window.localStorage) {
+      let mon = JSON.parse(localStorage.getItem("activeMonsters"));
+      setActiveMonsters(mon);
+    }
+  }
 
   // EVENT HANDLERS ------------------------------------------------------
   // These are sent down to child components as props
@@ -109,64 +151,148 @@ export default function Home() {
 
   const CombatSwitch = () => {
     return (
-      <Switch
-        checked={combatActive}
-        onChange={toggleCombat}
-        // onChange={setCombatActive}
-        className={classNames(
-          combatActive ? "bg-indigo-600" : "bg-gray-200",
-          "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
-        )}
+      <Switch.Group>
+        <div className="flex items-center">
+          <Switch.Label className="mr-4">Initiative</Switch.Label>
+
+          <Switch
+            checked={combatActive}
+            onChange={toggleCombat}
+            // onChange={setCombatActive}
+            className={classNames(
+              combatActive ? "bg-indigo-600" : "bg-gray-200",
+              "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
+            )}
+          >
+            <span className="sr-only">Use setting</span>
+            <span
+              className={classNames(
+                combatActive ? "translate-x-5" : "translate-x-0",
+                "pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+              )}
+            >
+              <span
+                className={classNames(
+                  combatActive
+                    ? "opacity-0 duration-100 ease-out"
+                    : "opacity-100 duration-200 ease-in",
+                  "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+                )}
+                aria-hidden="true"
+              >
+                <svg
+                  className="h-3 w-3 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 12 12"
+                >
+                  <path
+                    d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+              <span
+                className={classNames(
+                  combatActive
+                    ? "opacity-100 duration-200 ease-in"
+                    : "opacity-0 duration-100 ease-out",
+                  "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
+                )}
+                aria-hidden="true"
+              >
+                <svg
+                  className="h-3 w-3 text-indigo-600"
+                  fill="currentColor"
+                  viewBox="0 0 12 12"
+                >
+                  <path d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z" />
+                </svg>
+              </span>
+            </span>
+          </Switch>
+        </div>
+      </Switch.Group>
+    );
+  };
+
+  const ManageCharacters = () => {
+    return (
+      <Transition.Root
+        show={manageCharactersOpen}
+        as={Fragment}
+        appear
       >
-        <span className="sr-only">Use setting</span>
-        <span
-          className={classNames(
-            combatActive ? "translate-x-5" : "translate-x-0",
-            "pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-          )}
+        <Dialog
+          as="div"
+          className="relative z-10"
+          onClose={setManageCharactersOpen}
         >
-          <span
-            className={classNames(
-              combatActive
-                ? "opacity-0 duration-100 ease-out"
-                : "opacity-100 duration-200 ease-in",
-              "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
-            )}
-            aria-hidden="true"
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
           >
-            <svg
-              className="h-3 w-3 text-gray-400"
-              fill="none"
-              viewBox="0 0 12 12"
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-25 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 w-screen overflow-y-auto p-4 sm:p-6 md:p-20">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
             >
-              <path
-                d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-          <span
-            className={classNames(
-              combatActive
-                ? "opacity-100 duration-200 ease-in"
-                : "opacity-0 duration-100 ease-out",
-              "absolute inset-0 flex h-full w-full items-center justify-center transition-opacity"
-            )}
-            aria-hidden="true"
-          >
-            <svg
-              className="h-3 w-3 text-indigo-600"
-              fill="currentColor"
-              viewBox="0 0 12 12"
-            >
-              <path d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z" />
-            </svg>
-          </span>
-        </span>
-      </Switch>
+              <Dialog.Panel className="mx-auto max-w-xl transform rounded-xl bg-white p-6 shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
+                <div>
+                  <h2 className="text-gray-900">manage party</h2>
+                  <div className="flex gap-4">
+                    <div className="rounded-md px-3 pb-1.5 pt-2.5 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
+                      <label
+                        htmlFor="name"
+                        className="block text-xs font-medium text-gray-900"
+                      >
+                        Character Name
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        id="name"
+                        className="block w-full border-0 p-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                        placeholder="Jane Smith"
+                      />
+                    </div>
+                    <div className="rounded-md px-3 pb-1.5 pt-2.5 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
+                      <label
+                        htmlFor="name"
+                        className="block text-xs font-medium text-gray-900"
+                      >
+                        Armor Class
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        id="name"
+                        className="block w-full border-0 p-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                        placeholder="Jane Smith"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </Dialog>
+      </Transition.Root>
     );
   };
 
@@ -689,6 +815,7 @@ export default function Home() {
   return (
     <div className="bg-slate-600 rounded-lg col-span-4 row-span-6 m-5 flex flex-col items-center relative">
       <AddMonster />
+      <ManageCharacters />
       {/* Header */}
       <div
         id="header"
@@ -707,6 +834,8 @@ export default function Home() {
           </button>
         </div> */}
         <CombatSwitch />
+        <button onClick={handleSave}>save</button>
+        <button onClick={getData}>get</button>
         {/* Button Group */}
         <span className="isolate inline-flex rounded-md shadow-sm">
           <button
@@ -730,6 +859,26 @@ export default function Home() {
             />
           </button>
         </span>
+        <button
+          onClick={() => setManageCharactersOpen(true)}
+          className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        >
+          <UserGroupIcon
+            className="h-5 w-5"
+            aria-hidden="true"
+          />
+          Characters
+        </button>
+        <button
+          onClick={() => setAddMonstersOpen(true)}
+          className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        >
+          <UserGroupIcon
+            className="h-5 w-5"
+            aria-hidden="true"
+          />
+          Monsters
+        </button>
       </div>
 
       {/* Body */}
@@ -751,36 +900,6 @@ export default function Home() {
             </li>
           ))}
         </ul>
-      </div>
-
-      <div className="flex w-full justify-between mt-auto">
-        <button
-          onClick={startCombat}
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-red-300"
-        >
-          <PlayIcon className="h-6 w-6" />
-        </button>
-
-        <div className="">
-          <span className="uppercase">round</span>
-          <span className="ml-2">{roundCounter}</span>
-          {/* {turnCounter} */}
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            onClick={previousTurn}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-red-300"
-          >
-            <ChevronUpIcon className="h-6 w-6" />
-          </button>
-          <button
-            onClick={nextTurn}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-red-300"
-          >
-            <ChevronDownIcon className="h-6 w-6" />
-          </button>
-        </div>
       </div>
     </div>
   );
