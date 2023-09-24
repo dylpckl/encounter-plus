@@ -17,6 +17,7 @@ import clsx from "clsx";
 import SearchBar from "@/components/SearchBar";
 import SearchResults from "@/components/SearchResults";
 import MonsterCard from "@/components/MonsterCard";
+import CharacterCard from "@/components/CharacterCard";
 import HitPointPopover from "@/components/HitPointPopover";
 import CharacterInputs from "@/components/CharacterInputs";
 
@@ -127,7 +128,8 @@ export default function Home() {
 
   const initiative = [...activeMonsters, ...characters];
   const sortedInitiative = initiative.sort((a, b) => b.init - a.init);
-  console.log(sortedInitiative);
+  // console.log(sortedInitiative);
+
   const debouncedSearch = useDebounce(query);
 
   const activeMonsterCardRef = useRef(null);
@@ -276,9 +278,26 @@ export default function Home() {
         {
           id: nanoid(),
           init: 0,
+          active: false,
           name: newCharName,
           armorClass: newCharArmorClass,
           type: "character",
+          conditions: {
+            BLND: false,
+            CHRM: false,
+            DEAF: false,
+            FRGHT: false,
+            GRPL: false,
+            INCAP: false,
+            INVIS: false,
+            PRLZ: false,
+            PETR: false,
+            POIS: false,
+            PRNE: false,
+            REST: false,
+            STUN: false,
+            UNCON: false,
+          },
         },
       ]);
     }
@@ -619,49 +638,6 @@ export default function Home() {
         </Transition.Root>
       </Suspense>
     );
-    // <Transition.Root
-    //   show={addMonstersOpen}
-    //   as={Fragment}
-    //   // afterLeave={() => autocomplete.setQuery("")}
-    // >
-    //   <Dialog
-    //     onClose={setAddMonstersOpen}
-    //     className="fixed inset-0 z-50"
-    //   >
-    //     <Transition.Child
-    //       as={Fragment}
-    //       enter="ease-out duration-300"
-    //       enterFrom="opacity-0"
-    //       enterTo="opacity-100"
-    //       leave="ease-in duration-200"
-    //       leaveFrom="opacity-100"
-    //       leaveTo="opacity-0"
-    //     >
-    //       <div className="fixed inset-0 bg-zinc-400/25 backdrop-blur-sm dark:bg-black/40" />
-    //     </Transition.Child>
-
-    //     <div className="fixed inset-0 overflow-y-auto px-4 py-4 sm:px-6 sm:py-20 md:py-32 lg:px-8 lg:py-[15vh]">
-    //       <Transition.Child
-    //         as={Fragment}
-    //         enter="ease-out duration-300"
-    //         enterFrom="opacity-0 scale-95"
-    //         enterTo="opacity-100 scale-100"
-    //         leave="ease-in duration-200"
-    //         leaveFrom="opacity-100 scale-100"
-    //         leaveTo="opacity-0 scale-95"
-    //       >
-    //         <Dialog.Panel className="mx-auto transform-gpu overflow-hidden rounded-lg bg-zinc-50 shadow-xl ring-1 ring-zinc-900/7.5 dark:bg-zinc-900 dark:ring-zinc-800 sm:max-w-xl">
-    //           <div>
-    //             <SearchInput
-    //               // ref={inputRef}
-    //               onClose={() => setAddMonstersOpen(false)}
-    //             />
-    //           </div>
-    //         </Dialog.Panel>
-    //       </Transition.Child>
-    //     </div>
-    //   </Dialog>
-    // </Transition.Root>;
   };
 
   function batchMonsters(monster) {
@@ -995,7 +971,7 @@ export default function Home() {
   }
 
   return (
-    <div className="bg-slate-600 rounded-lg col-span-4 row-span-6 m-5 flex flex-col items-center relative">
+    <div className="bg-slate-600 rounded-lg col-span-6 row-span-6 m-5 flex flex-col items-center relative">
       <AddMonster />
       <ManageCharacters />
       {/* Header */}
@@ -1082,7 +1058,7 @@ export default function Home() {
                     onOpenHPPopover={setShowHPPopover}
                   />
                 ) : (
-                  <ul>char</ul>
+                  <CharacterCard character={monster} />
                 )}
               </li>
             );
