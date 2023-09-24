@@ -78,6 +78,7 @@ export default function Home() {
   // State
   const [query, setQuery] = useState("");
   // const [addMonstersOpen, setAddMonstersOpen] = useState(false);
+
   const [manageCharactersOpen, setManageCharactersOpen] = useState(false);
   const [characters, setCharacters] = useState(() => {
     return JSON.parse(localStorage.getItem("characters")) || [];
@@ -236,17 +237,6 @@ export default function Home() {
     );
   };
 
-  function handleAddCharacter(newName, newArmorClass) {
-    setCharacters((prev) => [
-      ...prev,
-      {
-        id: nanoid(),
-        name: newName,
-        armorClass: newArmorClass,
-      },
-    ]);
-  }
-
   function handleUpdateCharacter(char, e, key) {
     // New character
     if (char === undefined) {
@@ -257,43 +247,32 @@ export default function Home() {
       const charIndex = characters.findIndex((c) => c.id === char.id);
       if (charIndex !== -1) {
         // Update the existing character with the new value for the specified key
-        const updatedCharacters = characters.map((character, idx) => {
-          if (idx === charIndex) {
-            return { ...characters, [key]: e.target.value };
-          }
-          return character;
-        });
-        setCharacters(updatedCharacters);
+        // const updatedCharacters = characters.map((character, idx) => {
+        //   if (idx === charIndex) {
+        //     return { ...characters, [key]: e.target.value };
+        //   }
+        //   return character;
+        // });
+        // setCharacters(updatedCharacters);
+        setCharacters((prev) => [...prev, { ...char, [key]: e.target.value }]);
       }
     }
-
-    // const charIndex = characters.findIndex((c) => c.id === char.id);
-
-    // if (charIndex !== -1) {
-    //   // Update the existing character with the new value for the specified key
-    //   const updatedCharacters = characters.map((character, idx) => {
-    //     if (idx === charIndex) {
-    //       return { ...characters, [key]: e.target.value };
-    //     }
-    //     return character;
-    //   });
-    //   setCharacters(updatedCharacters);
-    // } else {
-    //   const newCharacter = { ...char, [key]: e.target.value };
-    //   setCharacters([...characters, newCharacter]);
-    // }
-
-    // const updatedCharacters = [...characters];
-
-    // if (charIndex) {
-    //   updatedCharacters[charIndex] = { ...char, key: e.target.value };
-    // } else {
-    //   // updatedCharacters =
-    // }
-    // setCharacters(updatedCharacters);
   }
-
   const ManageCharacters = () => {
+    const [newCharName, setNewCharName] = useState("");
+    const [newCharArmorClass, setNewCharArmorClass] = useState("");
+
+    function handleAddCharacter() {
+      setCharacters((prev) => [
+        ...prev,
+        {
+          id: nanoid(),
+          name: newCharName,
+          armorClass: newCharArmorClass,
+        },
+      ]);
+    }
+
     return (
       <Transition.Root
         show={manageCharactersOpen}
@@ -387,7 +366,7 @@ export default function Home() {
                           type="text"
                           name="name"
                           id="name"
-                          onChange={(e) => handleUpdateCharacter(e, name)}
+                          onChange={(e) => setNewCharName(e.target.value)}
                           className="block w-full border-0 p-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                           placeholder="Jane Smith"
                         />
@@ -404,13 +383,17 @@ export default function Home() {
                           name="name"
                           id="name"
                           // value={char.armorClass}
-                          onChange={(e) =>
-                            handleUpdateCharacter(char, e, armorClass)
-                          }
+                          onChange={(e) => setNewCharArmorClass(e.target.value)}
                           className="block w-full border-0 p-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                           placeholder="Jane Smith"
                         />
                       </div>
+                      <button
+                        onClick={handleAddCharacter}
+                        className="text-black"
+                      >
+                        save
+                      </button>
                     </div>
                   )}
                 </div>
