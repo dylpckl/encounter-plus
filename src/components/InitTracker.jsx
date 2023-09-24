@@ -61,6 +61,31 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
+// type Monster = {
+//   name: string;
+//   dexterity: number;
+//   armor_class: { value: number }[];
+//   hit_points: number;
+//   damage_immunities: string[]; // Assuming it's an array of strings
+//   damage_resistances: string[]; // Assuming it's an array of strings
+//   damage_vulnerabilities: string[]; // Assuming it's an array of strings
+//   proficiencies: {
+//     // Define the structure of the proficiencies property if needed
+//   }[];
+//   maxHP: number;
+//   active: boolean;
+//   init: number;
+//   id: string;
+//   conditions: {};
+// };
+
+// type Character = {
+//   name: string;
+//   armorClass: number;
+//   id: string;
+//   init: Number;
+// };
+
 const CHARACTERS = [
   {
     id: 1,
@@ -99,6 +124,10 @@ export default function Home() {
   });
 
   const sortedMonsters = activeMonsters.sort((a, b) => b.init - a.init);
+
+  const initiative = [...activeMonsters, ...characters];
+  const sortedInitiative = initiative.sort((a, b) => b.init - a.init);
+  console.log(sortedInitiative);
   const debouncedSearch = useDebounce(query);
 
   const activeMonsterCardRef = useRef(null);
@@ -237,27 +266,6 @@ export default function Home() {
     );
   };
 
-  function handleUpdateCharacter(char, e, key) {
-    // New character
-    if (char === undefined) {
-      // setCharacters(prev=>[...prev,
-      //   ...
-      // ])
-    } else {
-      const charIndex = characters.findIndex((c) => c.id === char.id);
-      if (charIndex !== -1) {
-        // Update the existing character with the new value for the specified key
-        // const updatedCharacters = characters.map((character, idx) => {
-        //   if (idx === charIndex) {
-        //     return { ...characters, [key]: e.target.value };
-        //   }
-        //   return character;
-        // });
-        // setCharacters(updatedCharacters);
-        setCharacters((prev) => [...prev, { ...char, [key]: e.target.value }]);
-      }
-    }
-  }
   const ManageCharacters = () => {
     const [newCharName, setNewCharName] = useState("");
     const [newCharArmorClass, setNewCharArmorClass] = useState("");
@@ -267,10 +275,32 @@ export default function Home() {
         ...prev,
         {
           id: nanoid(),
+          init: 0,
           name: newCharName,
           armorClass: newCharArmorClass,
+          type: "character",
         },
       ]);
+    }
+
+    function handleUpdateCharacter(char, e, key) {
+      const characterIndex = characters.findIndex((c) => c.id === char.id);
+      // console.log(char, characterIndex, characters);
+      if (characterIndex !== -1) {
+        const updatedCharacters = [...characters];
+        updatedCharacters[characterIndex] = {
+          ...char,
+          [key]: e.target.value,
+        };
+        setCharacters(updatedCharacters);
+        // setCharacters((prevChars) => {
+        //   [...prevChars, { ...char, [key]: e.target.value }];
+        // });
+      }
+    }
+
+    function removeCharacter(char) {
+      const characterIndex = characters.findIndex((c) => c.id === char.id);
     }
 
     return (
@@ -306,12 +336,63 @@ export default function Home() {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="mx-auto max-w-xl transform rounded-xl bg-white p-6 shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
+              <Dialog.Panel className="mx-auto max-w-xl transform rounded-xl bg-white p-6 shadow-2xl ring-1 ring-black ring-opacity-5 transition-all text-black">
                 <div>
                   <h2 className="text-gray-900">manage party</h2>
 
                   {characters.length > 0 ? (
-                    characters.map((char, idx) => (
+                    <>
+                      {characters.map((char, idx) => (
+                        <div className="flex gap-4">
+                          <div className="rounded-md px-3 pb-1.5 pt-2.5 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
+                            <label
+                              htmlFor="name"
+                              className="block text-xs font-medium text-gray-900"
+                            >
+                              Name
+                            </label>
+                            <input
+                              type="text"
+                              name="name"
+                              id="name"
+                              value={char.name}
+                              onChange={(e) =>
+                                handleUpdateCharacter(char, e, "name")
+                              }
+                              className="block w-full border-0 p-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                              placeholder="Jane Smith"
+                            />
+                          </div>
+                          <div className="rounded-md px-3 pb-1.5 pt-2.5 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
+                            <label
+                              htmlFor="name"
+                              className="block text-xs font-medium text-gray-900"
+                            >
+                              Armor Class
+                            </label>
+                            <input
+                              type="text"
+                              name="name"
+                              id="name"
+                              value={char.armorClass}
+                              onChange={(e) =>
+                                handleUpdateCharacter(char, e, "armorClass")
+                              }
+                              className="block w-full border-0 p-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                              placeholder="Jane Smith"
+                            />
+                          </div>
+                          <button
+                            onClick={() => {
+                              setCharacters(
+                                characters.filter((c) => c.id !== char.id)
+                              );
+                            }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      ))}
                       <div className="flex gap-4">
                         <div className="rounded-md px-3 pb-1.5 pt-2.5 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
                           <label
@@ -324,10 +405,7 @@ export default function Home() {
                             type="text"
                             name="name"
                             id="name"
-                            value={char.name}
-                            onChange={(e) =>
-                              handleUpdateCharacter(char, e, name)
-                            }
+                            onChange={(e) => setNewCharName(e.target.value)}
                             className="block w-full border-0 p-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                             placeholder="Jane Smith"
                           />
@@ -343,16 +421,22 @@ export default function Home() {
                             type="text"
                             name="name"
                             id="name"
-                            value={char.armorClass}
+                            // value={char.armorClass}
                             onChange={(e) =>
-                              handleUpdateCharacter(char, e, armorClass)
+                              setNewCharArmorClass(e.target.value)
                             }
                             className="block w-full border-0 p-0 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                             placeholder="Jane Smith"
                           />
                         </div>
+                        <button
+                          onClick={handleAddCharacter}
+                          className="text-black"
+                        >
+                          save
+                        </button>
                       </div>
-                    ))
+                    </>
                   ) : (
                     <div className="flex gap-4">
                       <div className="rounded-md px-3 pb-1.5 pt-2.5 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-indigo-600">
@@ -596,6 +680,7 @@ export default function Home() {
           active: false,
           init: rollInitiative(monster.dexterity),
           id: nanoid(),
+          type: "monster",
           conditions: {
             BLND: false,
             CHRM: false,
@@ -638,10 +723,6 @@ export default function Home() {
     setMonsterResults(data);
   };
 
-  // useEffect(() => {
-  //   debouncedFetchMonsters(query);
-  // }, [query]);
-
   useEffect(() => {
     if (query) {
       fetchMonsters(query);
@@ -649,14 +730,6 @@ export default function Home() {
       setMonsterResults([]);
     }
   }, [debouncedSearch]);
-
-  // useEffect(() => {
-  //   if (query) {
-  //     debouncedInputSearch(query);
-  //   } else {
-  //     setMonsterResults([]);
-  //   }
-  // }, [query]);
 
   function handleSearchChange(e) {
     setQuery(e.target.value);
@@ -993,23 +1066,44 @@ export default function Home() {
       {/* Body */}
       <div className="overflow-y-auto overflow-x-hidden h-full w-full p-3">
         <ul className="w-full flex flex-col space-y-2">
-          {sortedMonsters.map((monster, index) => (
-            <li key={monster.id}>
-              {/* <span>{index}</span> */}
-              <MonsterCard
-                ref={index === activeMonsterIndex ? activeMonsterCardRef : null}
-                monster={monster}
-                onKill={handleKill}
-                onDelete={handleDeleteMonster}
-                onInitChange={handleMonsterInitChange}
-                onSetCondition={handleMonsterCondition}
-                onOpenHPPopover={setShowHPPopover}
-              />
-              {/* <HitPointPopover /> */}
-            </li>
-          ))}
+          {sortedInitiative.map((monster, index) => {
+            return (
+              <li key={monster.id}>
+                {monster.type === "monster" ? (
+                  <MonsterCard
+                    ref={
+                      index === activeMonsterIndex ? activeMonsterCardRef : null
+                    }
+                    monster={monster}
+                    onKill={handleKill}
+                    onDelete={handleDeleteMonster}
+                    onInitChange={handleMonsterInitChange}
+                    onSetCondition={handleMonsterCondition}
+                    onOpenHPPopover={setShowHPPopover}
+                  />
+                ) : (
+                  <ul>char</ul>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     </div>
   );
 }
+
+// {sortedInitiative.map((monster, index) => (
+//   <li key={monster.id}>
+//     {/* <span>{index}</span> */}
+//     <MonsterCard
+//       ref={index === activeMonsterIndex ? activeMonsterCardRef : null}
+//       monster={monster}
+//       onKill={handleKill}
+//       onDelete={handleDeleteMonster}
+//       onInitChange={handleMonsterInitChange}
+//       onSetCondition={handleMonsterCondition}
+//       onOpenHPPopover={setShowHPPopover}
+//     />
+//   </li>
+// ))}

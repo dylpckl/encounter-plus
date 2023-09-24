@@ -47,8 +47,6 @@ const MonsterCard = forwardRef(
     const [currHP, setCurrHP] = useState(monster.hit_points);
     const [inputValue, setInputValue] = useState(0);
     const [conditionsOpen, setConditionsOpen] = useState(false);
-    // console.log(monster);
-    // console.log(monsterCard)
 
     const handleInputChange = (event) => {
       setInputValue(event.target.value);
