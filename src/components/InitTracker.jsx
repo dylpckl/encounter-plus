@@ -594,7 +594,7 @@ export default function Home() {
     setMonstersToAdd([...monstersToAdd, monster]);
   }
 
-  function addActiveMonsters() {
+  function onAddMonsters(monstersToAdd) {
     setAddMonstersOpen(false);
     monstersToAdd.map((monster) => {
       setActiveMonsters((prev) => [
@@ -607,6 +607,7 @@ export default function Home() {
           init: rollInitiative(monster.dexterity),
           id: nanoid(),
           type: "monster",
+          qty: monster.qty,
           conditions: {
             BLND: false,
             CHRM: false,
@@ -626,7 +627,7 @@ export default function Home() {
         },
       ]);
     });
-    setMonstersToAdd([]);
+    // setMonstersToAdd([]);
   }
 
   // Scroll the active monster into view when it changes
@@ -639,23 +640,23 @@ export default function Home() {
     }
   }, [activeMonsterIndex]);
 
-  const fetchMonsters = async (value) => {
-    const variables = { name: value };
-    const res = await fetch("/api/monsters", {
-      method: "POST",
-      body: JSON.stringify({ variables: variables }),
-    });
-    const data = await res.json();
-    setMonsterResults(data);
-  };
+  // const fetchMonsters = async (value) => {
+  //   const variables = { name: value };
+  //   const res = await fetch("/api/monsters", {
+  //     method: "POST",
+  //     body: JSON.stringify({ variables: variables }),
+  //   });
+  //   const data = await res.json();
+  //   setMonsterResults(data);
+  // };
 
-  useEffect(() => {
-    if (query) {
-      fetchMonsters(query);
-    } else {
-      setMonsterResults([]);
-    }
-  }, [debouncedSearch]);
+  // useEffect(() => {
+  //   if (query) {
+  //     fetchMonsters(query);
+  //   } else {
+  //     setMonsterResults([]);
+  //   }
+  // }, [debouncedSearch]);
 
   function handleSearchChange(e) {
     setQuery(e.target.value);
@@ -926,6 +927,7 @@ export default function Home() {
       <AddMonster
         open={addMonstersOpen}
         setOpen={setAddMonstersOpen}
+        onAddMonsters={onAddMonsters}
       />
       <ManageCharacters />
       {/* Header */}

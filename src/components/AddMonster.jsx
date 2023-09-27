@@ -1,9 +1,12 @@
 "use client";
 
 import { Fragment, useState, useEffect } from "react";
-import { CheckIcon, UsersIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, UsersIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Combobox, Dialog, Transition } from "@headlessui/react";
-import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
+import {
+  MagnifyingGlassIcon,
+  CheckCircleIcon,
+} from "@heroicons/react/20/solid";
 import useDebounce from "@/lib/hooks/useDebounce";
 
 function classNames(...classes) {
@@ -16,42 +19,42 @@ function classNames(...classes) {
 // setMonstersToAdd([...monstersToAdd, monster]);
 // }
 
-function addActiveMonsters() {
-  setAddMonstersOpen(false);
-  monstersToAdd.map((monster) => {
-    setActiveMonsters((prev) => [
-      ...prev,
+// function addActiveMonsters() {
+//   setAddMonstersOpen(false);
+//   monstersToAdd.map((monster) => {
+//     setActiveMonsters((prev) => [
+//       ...prev,
 
-      {
-        ...monster,
-        maxHP: monster.hit_points,
-        active: false,
-        init: rollInitiative(monster.dexterity),
-        id: nanoid(),
-        type: "monster",
-        conditions: {
-          BLND: false,
-          CHRM: false,
-          DEAF: false,
-          FRGHT: false,
-          GRPL: false,
-          INCAP: false,
-          INVIS: false,
-          PRLZ: false,
-          PETR: false,
-          POIS: false,
-          PRNE: false,
-          REST: false,
-          STUN: false,
-          UNCON: false,
-        },
-      },
-    ]);
-  });
-  setMonstersToAdd([]);
-}
+//       {
+//         ...monster,
+//         maxHP: monster.hit_points,
+//         active: false,
+//         init: rollInitiative(monster.dexterity),
+//         id: nanoid(),
+//         type: "monster",
+//         conditions: {
+//           BLND: false,
+//           CHRM: false,
+//           DEAF: false,
+//           FRGHT: false,
+//           GRPL: false,
+//           INCAP: false,
+//           INVIS: false,
+//           PRLZ: false,
+//           PETR: false,
+//           POIS: false,
+//           PRNE: false,
+//           REST: false,
+//           STUN: false,
+//           UNCON: false,
+//         },
+//       },
+//     ]);
+//   });
+//   setMonstersToAdd([]);
+// }
 
-export default function AddMonster({ open, setOpen }) {
+export default function AddMonster({ open, setOpen, onAddMonsters }) {
   const [query, setQuery] = useState("");
   //   const [open, setOpen] = useState(true);
   const [monsterResults, setMonsterResults] = useState("");
@@ -76,12 +79,33 @@ export default function AddMonster({ open, setOpen }) {
     }
   }, [debouncedSearch]);
 
-  //   const filteredPeople =
-  //     query === ""
-  //       ? []
-  //       : people.filter((person) => {
-  //           return person.name.toLowerCase().includes(query.toLowerCase());
-  //         });
+  function selectMonster(monster) {
+    console.log("selectmonster");
+    setSelectedMonsters([...selectedMonsters, { ...monster, qty: 1 }]);
+
+    // selectedMonsters.map((monster) => {
+    //   setSelectedMonsters((prev) => [...prev, { ...monster, qty: 1 }]);
+    // });
+
+    // setSelectedMonsters([
+    //   ...selectedMonsters,
+    //   { ...monster, qty: 1, test: "test" },
+    // ]);
+  }
+
+  function updateQty(monster, amt) {
+    // qty buttons only visible after selecting a monster, so the monster will definitely
+    // be in the selectedMonsters array
+    const monsterIndex = selectedMonsters.findIndex(
+      (selectedMonster) => selectedMonster.name === monster.name
+    );
+    if (monsterIndex === -1) {
+      setSelectedMonsters((prev) => [
+        ...prev,
+        { ...monster, qty: (qty += amt) },
+      ]);
+    }
+  }
 
   return (
     <Transition.Root
@@ -140,6 +164,15 @@ export default function AddMonster({ open, setOpen }) {
                     placeholder="Search for a monster..."
                     onChange={(event) => setQuery(event.target.value)}
                   />
+                  <button
+                    onClick={() => setQuery("")}
+                    className="absolute right-4"
+                  >
+                    <XMarkIcon
+                      className="pointer-events-none  h-5 w-5 text-gray-400"
+                      aria-hidden="true"
+                    />
+                  </button>
                 </div>
                 {monsterResults.length > 0 && (
                   <Combobox.Options
@@ -148,8 +181,9 @@ export default function AddMonster({ open, setOpen }) {
                   >
                     {monsterResults.map((monster) => (
                       <Combobox.Option
-                        key={monster.id}
+                        key={monster.name}
                         value={monster}
+                        onClick={() => selectMonster(monster)}
                         className={({ active }) =>
                           classNames(
                             "relative cursor-default select-none rounded-md px-4 pl-8 py-2",
@@ -184,24 +218,6 @@ export default function AddMonster({ open, setOpen }) {
                           </>
                         )}
                       </Combobox.Option>
-                      // <Combobox.Option
-                      //   key={monster.id}
-                      //   value={monster}
-                      //   as={Fragment}
-                      // >
-                      //   {({ active, selected }) => (
-                      //     <li
-                      //       className={`${
-                      //         active
-                      //           ? "bg-blue-500 text-white"
-                      //           : "bg-white text-black"
-                      //       }`}
-                      //     >
-                      //       {selected && <CheckIcon className="h-5 w-5" />}
-                      //       {monster.name}
-                      //     </li>
-                      //   )}
-                      // </Combobox.Option>
                     ))}
                   </Combobox.Options>
                 )}
@@ -222,18 +238,42 @@ export default function AddMonster({ open, setOpen }) {
               {selectedMonsters.length > 0 && (
                 <ul
                   role="list"
-                  className="divide-y divide-gray-100 text-gray-400"
+                  className="divide-y divide-gray-100 text-gray-400 p-4"
                 >
                   {selectedMonsters.map((monster) => (
                     <li
                       key={monster.name}
-                      className=""
+                      className="flex items-center justify-between py-2"
                     >
-                      {monster.name}
+                      <div>
+                        <span className="text-sm">{monster.name}</span>
+                      </div>
+                      <div>
+                        <button className="">-</button>
+                        <input
+                          type="number"
+                          defaultValue={monster.qty}
+                        />
+                        <button>+</button>
+                      </div>
                     </li>
                   ))}
                 </ul>
               )}
+              <div className="p-4 text-center">
+                <button
+                  type="button"
+                  onClick={() => onAddMonsters(selectedMonsters)}
+                  disabled={selectedMonsters.length === 0 ? "true" : ""}
+                  className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200"
+                >
+                  <CheckCircleIcon
+                    className="-ml-0.5 h-5 w-5"
+                    aria-hidden="true"
+                  />
+                  add monsters
+                </button>
+              </div>
             </Dialog.Panel>
           </Transition.Child>
         </div>
@@ -241,3 +281,8 @@ export default function AddMonster({ open, setOpen }) {
     </Transition.Root>
   );
 }
+
+// className={classNames(
+//   "absolute inset-y-0 left-0 flex items-center pl-1.5",
+//   active ? "text-white" : "text-indigo-600"
+// )}

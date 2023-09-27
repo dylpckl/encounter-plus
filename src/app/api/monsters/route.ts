@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       cache: "no-store",
     });
     const data = await res.json();
-    console.log(data);
+    // console.log(data);
     return NextResponse.json(data.data.monsters);
     // return NextResponse.json(data.data.monsters);
   } catch (e) {
