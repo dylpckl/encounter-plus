@@ -1,20 +1,62 @@
 "use client";
 
 import { Fragment, useState, useEffect } from "react";
-import { UsersIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, UsersIcon } from "@heroicons/react/24/outline";
 import { Combobox, Dialog, Transition } from "@headlessui/react";
-
+import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import useDebounce from "@/lib/hooks/useDebounce";
 
 function classNames(...classes) {
-    return classes.filter(Boolean).join(' ')
-  }
+  return classes.filter(Boolean).join(" ");
+}
+
+// click monsters, add to batch, confirm to add them to combat
+// onChange={batchMonsters}
+//   function batchMonsters(monster) {
+// setMonstersToAdd([...monstersToAdd, monster]);
+// }
+
+function addActiveMonsters() {
+  setAddMonstersOpen(false);
+  monstersToAdd.map((monster) => {
+    setActiveMonsters((prev) => [
+      ...prev,
+
+      {
+        ...monster,
+        maxHP: monster.hit_points,
+        active: false,
+        init: rollInitiative(monster.dexterity),
+        id: nanoid(),
+        type: "monster",
+        conditions: {
+          BLND: false,
+          CHRM: false,
+          DEAF: false,
+          FRGHT: false,
+          GRPL: false,
+          INCAP: false,
+          INVIS: false,
+          PRLZ: false,
+          PETR: false,
+          POIS: false,
+          PRNE: false,
+          REST: false,
+          STUN: false,
+          UNCON: false,
+        },
+      },
+    ]);
+  });
+  setMonstersToAdd([]);
+}
 
 export default function AddMonster({ open, setOpen }) {
   const [query, setQuery] = useState("");
   //   const [open, setOpen] = useState(true);
   const [monsterResults, setMonsterResults] = useState("");
   const debouncedSearch = useDebounce(query);
+  const [selectedMonsters, setSelectedMonsters] = useState([]);
 
   const fetchMonsters = async (value) => {
     const variables = { name: value };
@@ -26,13 +68,13 @@ export default function AddMonster({ open, setOpen }) {
     setMonsterResults(data);
   };
 
-    useEffect(() => {
-      if (query) {
-        fetchMonsters(query);
-      } else {
-        setMonsterResults([]);
-      }
-    }, [debouncedSearch]);
+  useEffect(() => {
+    if (query) {
+      fetchMonsters(query);
+    } else {
+      setMonsterResults([]);
+    }
+  }, [debouncedSearch]);
 
   //   const filteredPeople =
   //     query === ""
@@ -76,31 +118,90 @@ export default function AddMonster({ open, setOpen }) {
             leaveTo="opacity-0 scale-95"
           >
             <Dialog.Panel className="mx-auto max-w-xl transform rounded-xl bg-white p-2 shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
-              <Combobox onChange={(person) => (window.location = person.url)}>
-                <Combobox.Input
-                  className="w-full rounded-md border-0 bg-gray-100 px-4 py-2.5 text-gray-900 focus:ring-0 sm:text-sm"
-                  placeholder="Search..."
-                  onChange={(event) => setQuery(event.target.value)}
-                />
+              <Dialog.Title
+                as="h3"
+                className="text-base font-semibold leading-6 text-gray-900 px-2 py-3"
+              >
+                Add Monsters to encounter_name
+              </Dialog.Title>
 
+              <Combobox
+                value={selectedMonsters}
+                onChange={setSelectedMonsters}
+                multiple
+              >
+                <div className="relative flex items-center">
+                  <MagnifyingGlassIcon
+                    className="pointer-events-none absolute left-4 h-5 w-5 text-gray-400"
+                    aria-hidden="true"
+                  />
+                  <Combobox.Input
+                    className="w-full rounded-md border-0 bg-gray-100 pl-12 px-4 py-2.5 text-gray-900 focus:ring-0 sm:text-sm"
+                    placeholder="Search for a monster..."
+                    onChange={(event) => setQuery(event.target.value)}
+                  />
+                </div>
                 {monsterResults.length > 0 && (
                   <Combobox.Options
                     static
                     className="-mb-2 max-h-72 scroll-py-2 overflow-y-auto py-2 text-sm text-gray-800"
                   >
-                    {monsterResults.map((person) => (
+                    {monsterResults.map((monster) => (
                       <Combobox.Option
-                        key={person.id}
-                        value={person}
+                        key={monster.id}
+                        value={monster}
                         className={({ active }) =>
                           classNames(
-                            "cursor-default select-none rounded-md px-4 py-2",
+                            "relative cursor-default select-none rounded-md px-4 pl-8 py-2",
                             active && "bg-indigo-600 text-white"
                           )
                         }
                       >
-                        {person.name}
+                        {({ active, selected }) => (
+                          <>
+                            <span
+                              className={classNames(
+                                "block truncate",
+                                selected && "font-semibold"
+                              )}
+                            >
+                              {monster.name}
+                            </span>
+
+                            {selected && (
+                              <span
+                                className={classNames(
+                                  "absolute inset-y-0 left-0 flex items-center pl-1.5",
+                                  active ? "text-white" : "text-indigo-600"
+                                )}
+                              >
+                                <CheckIcon
+                                  className="h-5 w-5"
+                                  aria-hidden="true"
+                                />
+                              </span>
+                            )}
+                          </>
+                        )}
                       </Combobox.Option>
+                      // <Combobox.Option
+                      //   key={monster.id}
+                      //   value={monster}
+                      //   as={Fragment}
+                      // >
+                      //   {({ active, selected }) => (
+                      //     <li
+                      //       className={`${
+                      //         active
+                      //           ? "bg-blue-500 text-white"
+                      //           : "bg-white text-black"
+                      //       }`}
+                      //     >
+                      //       {selected && <CheckIcon className="h-5 w-5" />}
+                      //       {monster.name}
+                      //     </li>
+                      //   )}
+                      // </Combobox.Option>
                     ))}
                   </Combobox.Options>
                 )}
@@ -117,6 +218,22 @@ export default function AddMonster({ open, setOpen }) {
                   </div>
                 )}
               </Combobox>
+
+              {selectedMonsters.length > 0 && (
+                <ul
+                  role="list"
+                  className="divide-y divide-gray-100 text-gray-400"
+                >
+                  {selectedMonsters.map((monster) => (
+                    <li
+                      key={monster.name}
+                      className=""
+                    >
+                      {monster.name}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </Dialog.Panel>
           </Transition.Child>
         </div>
