@@ -1,18 +1,38 @@
+import { Combobox } from "@headlessui/react";
+import { useState } from "react";
+
 function SearchResults({ monsters, onChange }) {
-  console.log(monsters);
+  const [selectedMonster, setSelectedMonster] = useState(monsters[0]);
+  // console.log(monsters);
   return (
     <>
-      <ul className="bg-teal-300 text-black absolute z-20 w-full">
+      {/* <ul className="bg-teal-300 text-black z-20 w-full">
         {monsters.map((monster) => (
           <li
-          className=""
+            className="flex"
             key={monster.name}
             onClick={() => onChange(monster)}
           >
-            <h3>{monster.name}</h3>
+            <span>{monster.name}</span>
           </li>
         ))}
-      </ul>
+      </ul> */}
+      {/* <Combobox
+        value={selectedPerson}
+        onChange={setSelectedPerson}
+      >
+        <Combobox.Input onChange={(event) => setQuery(event.target.value)} />
+        <Combobox.Options>
+          {filteredPeople.map((person) => (
+            <Combobox.Option
+              key={person}
+              value={person}
+            >
+              {person}
+            </Combobox.Option>
+          ))}
+        </Combobox.Options>
+      </Combobox> */}
     </>
   );
 }

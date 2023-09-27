@@ -20,6 +20,7 @@ import MonsterCard from "@/components/MonsterCard";
 import CharacterCard from "@/components/CharacterCard";
 import HitPointPopover from "@/components/HitPointPopover";
 import CharacterInputs from "@/components/CharacterInputs";
+import AddMonster from "@/components/AddMonster";
 
 // Utils
 import rollInitiative from "@/lib/rollInitiative";
@@ -36,13 +37,6 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { type } from "os";
-
-function filterMonsters(monsters, query) {
-  query = query.toLowerCase();
-  return monsters.filter((mon) =>
-    mon.name.split(" ").some((word) => word.toLowerCase().startsWith(query))
-  );
-}
 
 function debounce(func, delay) {
   let timerId;
@@ -61,31 +55,6 @@ function debounce(func, delay) {
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
-
-// type Monster = {
-//   name: string;
-//   dexterity: number;
-//   armor_class: { value: number }[];
-//   hit_points: number;
-//   damage_immunities: string[]; // Assuming it's an array of strings
-//   damage_resistances: string[]; // Assuming it's an array of strings
-//   damage_vulnerabilities: string[]; // Assuming it's an array of strings
-//   proficiencies: {
-//     // Define the structure of the proficiencies property if needed
-//   }[];
-//   maxHP: number;
-//   active: boolean;
-//   init: number;
-//   id: string;
-//   conditions: {};
-// };
-
-// type Character = {
-//   name: string;
-//   armorClass: number;
-//   id: string;
-//   init: Number;
-// };
 
 const CHARACTERS = [
   {
@@ -119,7 +88,7 @@ export default function Home() {
     return JSON.parse(localStorage.getItem("roundCtr")) || 1;
   });
 
-  const [addMonstersOpen, setAddMonstersOpen] = useState(false);
+  const [addMonstersOpen, setAddMonstersOpen] = useState(true);
   const [combatActive, setCombatActive] = useState(() => {
     return JSON.parse(localStorage.getItem("combatActive") === true || false);
   });
@@ -508,137 +477,118 @@ export default function Home() {
     );
   };
 
-  const SearchInput = forwardRef(function SearchInput(
-    { autocomplete, autocompleteState, onClose },
-    inputRef
-  ) {
-    return (
-      <div className="group relative flex h-12">
-        {/* <SearchIcon className="pointer-events-none absolute left-3 top-0 h-full w-5 stroke-zinc-500" /> */}
-        <input
-          ref={inputRef}
-          className={clsx(
-            "flex-auto appearance-none bg-transparent pl-10 text-zinc-900 outline-none placeholder:text-zinc-500 focus:w-full focus:flex-none dark:text-white sm:text-sm [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden",
-            autocompleteState.status === "stalled" ? "pr-11" : "pr-4"
-          )}
-        />
-      </div>
-    );
-  });
+  // const AddMonster = () => {
+  //   return (
+  //     <Suspense fallback={null}>
+  //       <Transition.Root
+  //         show={addMonstersOpen}
+  //         as={Fragment}
+  //         // appear
+  //       >
+  //         <Dialog
+  //           initialFocus={completeButtonRef}
+  //           as="div"
+  //           className="relative z-10"
+  //           onClose={() => setAddMonstersOpen(false)}
+  //         >
+  //           <Transition.Child
+  //             as={Fragment}
+  //             enter="ease-out duration-300"
+  //             enterFrom="opacity-0"
+  //             enterTo="opacity-100"
+  //             leave="ease-in duration-200"
+  //             leaveFrom="opacity-100"
+  //             leaveTo="opacity-0"
+  //           >
+  //             <div className="fixed inset-0 bg-gray-500 bg-opacity-25 transition-opacity" />
+  //           </Transition.Child>
 
-  const AddMonster = () => {
-    return (
-      <Suspense fallback={null}>
-        <Transition.Root
-          show={addMonstersOpen}
-          as={Fragment}
-          // appear
-        >
-          <Dialog
-            initialFocus={completeButtonRef}
-            as="div"
-            className="relative z-10"
-            onClose={() => setAddMonstersOpen(false)}
-          >
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0"
-              enterTo="opacity-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100"
-              leaveTo="opacity-0"
-            >
-              <div className="fixed inset-0 bg-gray-500 bg-opacity-25 transition-opacity" />
-            </Transition.Child>
+  //           <div className="fixed inset-0 z-10 w-screen overflow-y-auto p-4 sm:p-6 md:p-20">
+  //             <Transition.Child
+  //               as={Fragment}
+  //               enter="ease-out duration-300"
+  //               enterFrom="opacity-0 scale-95"
+  //               enterTo="opacity-100 scale-100"
+  //               leave="ease-in duration-200"
+  //               leaveFrom="opacity-100 scale-100"
+  //               leaveTo="opacity-0 scale-95"
+  //             >
+  //               <Dialog.Panel className="mx-auto max-w-xl transform rounded-xl bg-white p-6 shadow-2xl ring-1 ring-black ring-opacity-5 transition-all text-gray-900">
+  //                 <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
+  //                   <button
+  //                     type="button"
+  //                     className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+  //                     onClick={() => setAddMonstersOpen(false)}
+  //                   >
+  //                     <span className="sr-only">Close</span>
+  //                     <XMarkIcon
+  //                       className="h-6 w-6"
+  //                       aria-hidden="true"
+  //                     />
+  //                   </button>
+  //                 </div>
+  //                 <Dialog.Title
+  //                   as="h2"
+  //                   className="text-lg font-medium leading-6 text-gray-900"
+  //                 >
+  //                   Add Monsters to encounter name
+  //                 </Dialog.Title>
+  //                 <div className="flex w-full">
+  //                   <MonsterCombobox />
+  //                   <SearchBar
+  //                     query={query}
+  //                     // onChange={setQuery}
+  //                     onChange={handleSearchChange}
+  //                     onClick={clearQuery}
+  //                   />
+  //                   {query.length > 0 && (
+  //                     <SearchResults
+  //                       // monsters={debouncedSearchValue}
+  //                       monsters={monsterResults}
+  //                       onChange={batchMonsters}
+  //                       // onChange={handleAddMonster}
+  //                       // onChange={handleAddActiveMonster}
+  //                     />
+  //                   )}
+  //                   <ul>
+  //                     {monstersToAdd.map((monster, idx) => (
+  //                       <li
+  //                         key={idx}
+  //                         // onChange={handleAddMonster}
+  //                       >
+  //                         {monster.name}
+  //                       </li>
+  //                     ))}
+  //                   </ul>
 
-            <div className="fixed inset-0 z-10 w-screen overflow-y-auto p-4 sm:p-6 md:p-20">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
-              >
-                <Dialog.Panel className="mx-auto max-w-xl transform rounded-xl bg-white p-6 shadow-2xl ring-1 ring-black ring-opacity-5 transition-all text-gray-900">
-                  <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
-                    <button
-                      type="button"
-                      className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                      onClick={() => setOpen(false)}
-                    >
-                      <span className="sr-only">Close</span>
-                      <XMarkIcon
-                        className="h-6 w-6"
-                        aria-hidden="true"
-                      />
-                    </button>
-                  </div>
-                  <Dialog.Title
-                    as="h2"
-                    className="text-lg font-medium leading-6 text-gray-900"
-                  >
-                    Add Monsters
-                  </Dialog.Title>
-                  <div className="flex">
-                    <div className="w-1/2 mt-2">
-                      <SearchBar
-                        query={query}
-                        // onChange={setQuery}
-                        onChange={handleSearchChange}
-                        onClick={clearQuery}
-                      />
-                      {query.length > 0 && (
-                        <SearchResults
-                          // monsters={debouncedSearchValue}
-                          monsters={monsterResults}
-                          onChange={batchMonsters}
-                          // onChange={handleAddMonster}
-                          // onChange={handleAddActiveMonster}
-                        />
-                      )}
-                      <ul>
-                        {monstersToAdd.map((monster, idx) => (
-                          <li
-                            key={idx}
-                            // onChange={handleAddMonster}
-                          >
-                            {monster.name}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+  //                   {/* <div className="w-1/2 bg-sky-500">
+  //                     <ul>
+  //                       {activeMonsters.map((monster, idx) => (
+  //                         <li key={idx}>{monster.name}</li>
+  //                       ))}
+  //                     </ul>
+  //                   </div> */}
+  //                 </div>
 
-                    <div className="w-1/2 bg-sky-500">
-                      <ul>
-                        {activeMonsters.map((monster, idx) => (
-                          <li key={idx}>{monster.name}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="mt-4">
-                    <button
-                      ref={completeButtonRef}
-                      type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                      onClick={addActiveMonsters}
-                      // onClick={() => setAddMonstersOpen(false)}
-                    >
-                      Got it, thanks!
-                    </button>
-                  </div>
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
-          </Dialog>
-        </Transition.Root>
-      </Suspense>
-    );
-  };
+  //                 <div className="mt-4">
+  //                   <button
+  //                     ref={completeButtonRef}
+  //                     type="button"
+  //                     className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+  //                     onClick={addActiveMonsters}
+  //                     // onClick={() => setAddMonstersOpen(false)}
+  //                   >
+  //                     Got it, thanks!
+  //                   </button>
+  //                 </div>
+  //               </Dialog.Panel>
+  //             </Transition.Child>
+  //           </div>
+  //         </Dialog>
+  //       </Transition.Root>
+  //     </Suspense>
+  //   );
+  // };
 
   function batchMonsters(monster) {
     setMonstersToAdd([...monstersToAdd, monster]);
@@ -972,7 +922,11 @@ export default function Home() {
 
   return (
     <div className="bg-slate-600 rounded-lg col-span-6 row-span-6 m-5 flex flex-col items-center relative">
-      <AddMonster />
+      {/* <AddMonster /> */}
+      <AddMonster
+        open={addMonstersOpen}
+        setOpen={setAddMonstersOpen}
+      />
       <ManageCharacters />
       {/* Header */}
       <div
