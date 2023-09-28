@@ -1,7 +1,15 @@
 "use client";
 
 import { Fragment, useState, useEffect } from "react";
-import { CheckIcon, UsersIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  CheckIcon,
+  MinusIcon,
+  MinusSmallIcon,
+  PlusIcon,
+  PlusSmallIcon,
+  UsersIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import { Combobox, Dialog, Transition } from "@headlessui/react";
 import {
   MagnifyingGlassIcon,
@@ -24,7 +32,6 @@ function classNames(...classes) {
 //   monstersToAdd.map((monster) => {
 //     setActiveMonsters((prev) => [
 //       ...prev,
-
 //       {
 //         ...monster,
 //         maxHP: monster.hit_points,
@@ -58,8 +65,9 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
   const [query, setQuery] = useState("");
   //   const [open, setOpen] = useState(true);
   const [monsterResults, setMonsterResults] = useState("");
-  const debouncedSearch = useDebounce(query);
   const [selectedMonsters, setSelectedMonsters] = useState([]);
+
+  const debouncedSearch = useDebounce(query);
 
   const fetchMonsters = async (value) => {
     const variables = { name: value };
@@ -80,8 +88,21 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
   }, [debouncedSearch]);
 
   function selectMonster(monster) {
-    console.log("selectmonster");
-    setSelectedMonsters([...selectedMonsters, { ...monster, qty: 1 }]);
+    // console.log("selectmonster");
+
+    setSelectedMonsters((prev) => [...prev, { ...monster, qty: 1 }]);
+    // console.log(selectedMonsters);
+    // const newMonsters = selectedMonsters.map((m) => {
+    //   if (m.name !== monster.name) {
+    //     return
+    //   }
+    //   return { ...m, qty: 1 };
+    // });
+
+    // let newM = { ...monster, qty: "hel" };
+    // const newMonsters = [...selectedMonsters, newM];
+    // console.log(newMonsters);
+    // setSelectedMonsters(newMonsters);
 
     // selectedMonsters.map((monster) => {
     //   setSelectedMonsters((prev) => [...prev, { ...monster, qty: 1 }]);
@@ -93,17 +114,23 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
     // ]);
   }
 
-  function updateQty(monster, amt) {
+  function updateQty(monster) {
     // qty buttons only visible after selecting a monster, so the monster will definitely
     // be in the selectedMonsters array
     const monsterIndex = selectedMonsters.findIndex(
       (selectedMonster) => selectedMonster.name === monster.name
     );
-    if (monsterIndex === -1) {
-      setSelectedMonsters((prev) => [
-        ...prev,
-        { ...monster, qty: (qty += amt) },
-      ]);
+
+    if (monsterIndex !== -1) {
+      // https://react.dev/learn/updating-arrays-in-state#updating-objects-inside-arrays
+      setSelectedMonsters(
+        selectedMonsters.map((m) => {
+          if (m.name === monster.name) {
+            return { ...m, qty: (monster.qty += 1) };
+          }
+          return m;
+        })
+      );
     }
   }
 
@@ -111,7 +138,10 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
     <Transition.Root
       show={open}
       as={Fragment}
-      afterLeave={() => setQuery("")}
+      afterLeave={() => {
+        setQuery("");
+        setSelectedMonsters([]);
+      }}
       appear
     >
       <Dialog
@@ -144,14 +174,30 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
             <Dialog.Panel className="mx-auto max-w-xl transform rounded-xl bg-white p-2 shadow-2xl ring-1 ring-black ring-opacity-5 transition-all">
               <Dialog.Title
                 as="h3"
-                className="text-base font-semibold leading-6 text-gray-900 px-2 py-3"
+                className="flex justify-between text-base font-semibold leading-6 text-gray-900 px-2 py-3"
               >
                 Add Monsters to encounter_name
+                {/* <button
+                  type="button"
+                  className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  onClick={() => setOpen(false)}
+                >
+                  <span className="sr-only">Close</span>
+                  <XMarkIcon
+                    className="h-6 w-6"
+                    aria-hidden="true"
+                  />
+                </button> */}
               </Dialog.Title>
 
               <Combobox
                 value={selectedMonsters}
-                onChange={setSelectedMonsters}
+                // onChange={(monsters) => {
+                //   // console.dir(e);
+                //   setSelectedMonsters(prev=>[...prev, monsters);
+                // }}
+                // // onChange={
+                // // }
                 multiple
               >
                 <div className="relative flex items-center">
@@ -160,7 +206,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                     aria-hidden="true"
                   />
                   <Combobox.Input
-                    className="w-full rounded-md border-0 bg-gray-100 pl-12 px-4 py-2.5 text-gray-900 focus:ring-0 sm:text-sm"
+                    className="w-full rounded-md border-0 bg-gray-100 pl-12 px-4 py-2.5 text-gray-900 focus:ring-0 sm:text-sm mx-2"
                     placeholder="Search for a monster..."
                     onChange={(event) => setQuery(event.target.value)}
                   />
@@ -177,11 +223,11 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                 {monsterResults.length > 0 && (
                   <Combobox.Options
                     static
-                    className="-mb-2 max-h-72 scroll-py-2 overflow-y-auto py-2 text-sm text-gray-800"
+                    className="mx-2 -mb-2 max-h-72 scroll-py-2 overflow-y-auto py-2 text-sm text-gray-800"
                   >
-                    {monsterResults.map((monster) => (
+                    {monsterResults.map((monster, idx) => (
                       <Combobox.Option
-                        key={monster.name}
+                        key={idx}
                         value={monster}
                         onClick={() => selectMonster(monster)}
                         className={({ active }) =>
@@ -248,24 +294,40 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                       <div>
                         <span className="text-sm">{monster.name}</span>
                       </div>
-                      <div>
-                        <button className="">-</button>
+                      <div className="flex gap-2">
+                        <button className="w-9 h-9 text-center rounded-full bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                          <MinusSmallIcon className="w-4 h-4" />
+                        </button>
                         <input
-                          type="number"
-                          defaultValue={monster.qty}
+                          type="text"
+                          // defaultValue={monster.qty}
+                          value={monster.qty}
+                          className="w-12 rounded-md border-0 py-1.5 text-gray-900 text-center shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                         />
-                        <button>+</button>
+                        <button
+                          onClick={() => updateQty(monster)}
+                          className="w-9 h-9 text-center rounded-full bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                        >
+                          <PlusSmallIcon className="w-4 h-4" />
+                        </button>
                       </div>
                     </li>
                   ))}
                 </ul>
               )}
-              <div className="p-4 text-center">
+              <div className="flex gap-4 p-2 mt-2 text-center">
+                <button
+                  type="button"
+                  className="w-1/2 mt-3 inline-flex items-center justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:col-start-1 sm:mt-0"
+                  onClick={() => setOpen(false)}
+                >
+                  Cancel
+                </button>
                 <button
                   type="button"
                   onClick={() => onAddMonsters(selectedMonsters)}
-                  disabled={selectedMonsters.length === 0 ? "true" : ""}
-                  className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-200"
+                  disabled={selectedMonsters.length === 0 ? true : false}
+                  className="w-1/2 inline-flex text-center justify-center capitalize gap-x-1.5 rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-300 transition-colors"
                 >
                   <CheckCircleIcon
                     className="-ml-0.5 h-5 w-5"
