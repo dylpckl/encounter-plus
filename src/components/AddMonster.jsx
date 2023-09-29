@@ -147,11 +147,12 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
   }
 
   function handleNameChange(event, monster) {
+    // console.log(selectedMonsters, monster);
     const newName = event.target.value;
     setSelectedMonsters(
       selectedMonsters.map((m) => {
-        if (m.name !== monster.name) {
-          return;
+        if (m.id !== monster.id) {
+          return m;
         }
         return { ...m, name: newName };
       })
@@ -384,7 +385,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                       </thead>
                       <tbody>
                         {selectedMonsters.map((monster, monsterIdx) => (
-                          <tr key={monsterIdx}>
+                          <tr key={monster.id}>
                             <td
                               className={classNames(
                                 monsterIdx !== selectedMonsters.length - 1
@@ -399,7 +400,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                                 id="email"
                                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 placeholder="you@example.com"
-                                value={monster.name}
+                                defaultValue={monster.name}
                                 onChange={(e) => handleNameChange(e, monster)}
                               />
                             </td>
@@ -417,7 +418,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                                 id="email"
                                 className="block w-12 rounded-md border-0 py-1.5 mx-auto text-center text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 placeholder="you@example.com"
-                                value={monster.armorClass}
+                                defaultValue={monster.armorClass}
                                 // onChange={(e) => handleNameChange(e, monster)}
                               />
                             </td>
@@ -435,7 +436,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                                 id="email"
                                 className="block w-12 rounded-md border-0 py-1.5 mx-auto text-center text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 placeholder="you@example.com"
-                                value={monster.hitPoints}
+                                defaultValue={monster.hitPoints}
                                 // onChange={(e) => handleNameChange(e, monster)}
                               />
                             </td>
