@@ -24,8 +24,8 @@ function classNames(...classes) {
 }
 
 const TEST = [
-  { id: 1, name: "monster", armorClass: 14, hitPoints: 30, qty: 1 },
-  { id: 2, name: "monster", armorClass: 14, hitPoints: 30, qty: 1 },
+  { id: 1, name: "monster", armor_class: 14, hit_points: 30, qty: 1 },
+  { id: 2, name: "monster", armor_class: 14, hit_points: 30, qty: 1 },
 ];
 
 // multiple selections; two options:
@@ -43,7 +43,7 @@ const TEST = [
 export default function AddMonster({ open, setOpen, onAddMonsters }) {
   const [query, setQuery] = useState("");
   const [monsterResults, setMonsterResults] = useState("");
-  const [selectedMonsters, setSelectedMonsters] = useState(TEST);
+  const [selectedMonsters, setSelectedMonsters] = useState([]);
   const debouncedSearch = useDebounce(query);
 
   const fetchMonsters = async (value) => {
@@ -53,7 +53,11 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
       body: JSON.stringify({ variables: variables }),
     });
     const data = await res.json();
-    setMonsterResults(data);
+    console.log(data)
+    const monsterResultsWithFormFields = data.map((m) => {
+      return { ...m, qty: 1 };
+    });
+    setMonsterResults(monsterResultsWithFormFields);
   };
 
   useEffect(() => {
@@ -167,8 +171,8 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
       ...selectedMonsters,
       {
         name: fromQuery ? query : null,
-        armorClass: null,
-        hitPoints: null,
+        armor_class: null,
+        hit_points: null,
         qty: 1,
       },
     ]);
@@ -196,7 +200,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
       <Dialog
         as="div"
         className="relative z-10"
-        onClose={setOpen}
+        onClose={() => {}}
       >
         <Transition.Child
           as={Fragment}
@@ -241,28 +245,31 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
 
               <Combobox
                 value={selectedMonsters}
-                // onChange={setSelectedMonsters}
+                onChange={setSelectedMonsters}
                 // onChange={(monsters) => {
                 //   // console.dir(e);
                 //   setSelectedMonsters(prev=>[...prev, monsters);
                 // }}
-                // // onChange={
-                // // }
                 multiple
+                as="div"
+                className=" p-2 rounded-lg m-6 ring-1 ring-gray-300"
               >
                 <div className="relative flex items-center">
                   <MagnifyingGlassIcon
-                    className="pointer-events-none absolute left-8 h-5 w-5 text-gray-400"
+                    className="pointer-events-none absolute left-4 h-5 w-5 text-gray-400"
                     aria-hidden="true"
                   />
                   <Combobox.Input
-                    className="w-full rounded-md border-0 bg-gray-100 pl-12 px-4 py-2.5 text-gray-900 focus:ring-0 sm:text-sm mx-6"
+                    className="w-full border-0 bg-gray-100 pl-12 px-4 py-2.5 text-gray-900 focus:ring-0 sm:text-sm"
                     placeholder="Search for a monster..."
+                    // displayValue={(selectedMonsters) =>
+                    //   selectedMonsters.map((m) => m.name).join(", ")
+                    // }
                     onChange={(event) => setQuery(event.target.value)}
                   />
                   <button
                     onClick={() => setQuery("")}
-                    className="absolute right-8"
+                    className="absolute right-4"
                   >
                     <XMarkIcon
                       className="pointer-events-none  h-5 w-5 text-gray-400"
@@ -273,7 +280,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                 {monsterResults.length > 0 && (
                   <Combobox.Options
                     static
-                    className="mx-4 -mb-2 max-h-72 scroll-py-2 overflow-y-auto py-2 text-sm text-gray-800"
+                    className="-mb-2 max-h-96 scroll-py-2 overflow-y-auto py-2 text-sm text-gray-800"
                   >
                     {monsterResults.map((monster, idx) => (
                       <Combobox.Option
@@ -443,7 +450,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                                   data-lpignore="true"
                                   className="block w-12 rounded-md border-0 py-1.5 mx-auto text-center text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                   placeholder="you@example.com"
-                                  defaultValue={monster.armorClass}
+                                  defaultValue={monster.armor_class[0].value}
                                   // onChange={(e) => handleNameChange(e, monster)}
                                 />
                               </td>
@@ -462,7 +469,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                                   data-lpignore="true"
                                   className="block w-12 rounded-md border-0 py-1.5 mx-auto text-center text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                   placeholder="you@example.com"
-                                  defaultValue={monster.hitPoints}
+                                  defaultValue={monster.hit_points}
                                   // onChange={(e) => handleNameChange(e, monster)}
                                 />
                               </td>
