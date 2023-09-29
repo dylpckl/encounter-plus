@@ -75,46 +75,64 @@ export default function Home() {
   // const [addMonstersOpen, setAddMonstersOpen] = useState(false);
 
   const [manageCharactersOpen, setManageCharactersOpen] = useState(false);
-  const [characters, setCharacters] = useState(() => {
-    return JSON.parse(localStorage.getItem("characters")) || [];
-  });
-  const [activeMonsters, setActiveMonsters] = useState(() => {
-    return JSON.parse(localStorage.getItem("activeMonsters")) || [];
-  });
+  const [characters, setCharacters] = useState([]);
+  // const [characters, setCharacters] = useState(() => {
+  //   return typeof window !== "undefined"
+  //     ? JSON.parse(window.localStorage.getItem("characters"))
+  //     : [];
+  // });
+  const [activeMonsters, setActiveMonsters] = useState([]);
+  // const [activeMonsters, setActiveMonsters] = useState(() => {
+  //   return typeof window !== "undefined"
+  //     ? JSON.parse(window.localStorage.getItem("activeMonsters"))
+  //     : [];
+  // });
+  const [roundCtr, setRoundCtr] = useState(1);
+  // const [roundCtr, setRoundCtr] = useState(() => {
+  //   return typeof window !== "undefined"
+  //     ? JSON.parse(window.localStorage.getItem("roundCtr"))
+  //     : 1;
+  // });
+  const [combatActive, setCombatActive] = useState(false);
+  // const [combatActive, setCombatActive] = useState(() => {
+  //   return typeof window !== "undefined"
+  //     ? JSON.parse(localStorage.getItem("combatActive") === true)
+  //     : false;
+  // });
+
   const [showHPPopover, setShowHPPopover] = useState(false);
   const [monsterResults, setMonsterResults] = useState([]);
   const [monstersToAdd, setMonstersToAdd] = useState([]);
-  const [roundCtr, setRoundCounter] = useState(() => {
-    return JSON.parse(localStorage.getItem("roundCtr")) || 1;
-  });
-
   const [addMonstersOpen, setAddMonstersOpen] = useState(true);
-  const [combatActive, setCombatActive] = useState(() => {
-    return JSON.parse(localStorage.getItem("combatActive") === true || false);
-  });
 
   const sortedMonsters = activeMonsters.sort((a, b) => b.init - a.init);
-
   const initiative = [...activeMonsters, ...characters];
   const sortedInitiative = initiative.sort((a, b) => b.init - a.init);
-  // console.log(sortedInitiative);
-
   const debouncedSearch = useDebounce(query);
-
   const activeMonsterCardRef = useRef(null);
-
-  const completeButtonRef = useRef(null);
-
   const activeMonsterIndex = activeMonsters.findIndex(
     (monster) => monster.active === true
   );
 
-  // useEffect(() => {
-  //   if (typeof window !== "undefined" && window.localStorage) {
-  //     let storedMonsters = JSON.parse(localStorage.getItem("activeMonsters"));
-  //     setActiveMonsters(storedMonsters);
-  //   }
-  // }, []);
+  //
+  // https://nextjs.org/docs/messages/react-hydration-error
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.localStorage) {
+      let storedCharacters = JSON.parse(
+        window.localStorage.getItem("characters")
+      );
+      let storedMonsters = JSON.parse(localStorage.getItem("activeMonsters"));
+      let storedRoundCtr = JSON.parse(window.localStorage.getItem("roundCtr"));
+      let storedCombatActive = JSON.parse(
+        localStorage.getItem("combatActive") === true
+      );
+
+      setActiveMonsters(storedMonsters);
+      setCharacters(storedCharacters);
+      setRoundCtr(storedRoundCtr);
+      setCombatActive(storedCombatActive);
+    }
+  }, []);
 
   // https://articles.wesionary.team/using-localstorage-with-next-js-a-beginners-guide-7fc4f8bfd9dc
   useEffect(() => {

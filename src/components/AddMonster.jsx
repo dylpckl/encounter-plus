@@ -1,6 +1,8 @@
 "use client";
 
 import { Fragment, useState, useEffect } from "react";
+import { nanoid } from "nanoid";
+
 import {
   CheckIcon,
   MinusIcon,
@@ -22,16 +24,26 @@ function classNames(...classes) {
 }
 
 const TEST = [
-  { name: "monster", armorClass: 14, hitPoints: 30, qty: 1 },
-  { name: "monster", armorClass: 14, hitPoints: 30, qty: 1 },
+  { id: 1, name: "monster", armorClass: 14, hitPoints: 30, qty: 1 },
+  { id: 2, name: "monster", armorClass: 14, hitPoints: 30, qty: 1 },
 ];
+
+// multiple selections; two options:
+// 1. use out-of-box Combobox onChange
+// - pros: checkboxes show, unclick to remove
+// - cons: need to add secondary state to intercept and manage name, qty, etc
+// 2. handle it manually
+// - pros: avoid secondary state complications
+// - cons: need to do everything manually:
+//    - [x] style monster results depening on selected (add id to api results)
+//    - [ ] re-click monster result to remove from selected
+//    -
+//    -
 
 export default function AddMonster({ open, setOpen, onAddMonsters }) {
   const [query, setQuery] = useState("");
-  //   const [open, setOpen] = useState(true);
   const [monsterResults, setMonsterResults] = useState("");
   const [selectedMonsters, setSelectedMonsters] = useState(TEST);
-
   const debouncedSearch = useDebounce(query);
 
   const fetchMonsters = async (value) => {
@@ -52,8 +64,28 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
     }
   }, [debouncedSearch]);
 
-  function selectMonster(monster) {
-    setSelectedMonsters((prev) => [...prev, { ...monster, qty: 1 }]);
+  function handleSelectMonster(monster) {
+    // Select monster if not already selected (compare by name)
+
+    setSelectedMonsters((prev) =>
+      prev.some((m) => m.name === monster.name)
+        ? prev
+        : [...prev, { ...monster, id: nanoid(), qty: 1 }]
+    );
+
+    // setSelectedMonsters(
+    //   selectedMonsters.map((m) => {
+    //     if (m.name === monster.name) {
+    //       return m;
+    //     }
+    //     return { ...monster, id: nanoid(), qty: 1 };
+    //   })
+    // );
+
+    // setSelectedMonsters((prev) => [
+    //   ...prev,
+    //   { ...monster, id: nanoid(), qty: 1 },
+    // ]);
   }
 
   function updateQty(monster, action, newValue = null) {
@@ -104,7 +136,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
     }
   }
 
-  const handleQtyChange = (event, monster) => {
+  function handleQtyChange(event, monster) {
     // console.log(event.target.value, monster);
     const newValue = parseInt(event.target.value, 10); // Parse the input value as an integer
     if (!isNaN(newValue)) {
@@ -112,9 +144,9 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
       updateQty(monster, "set", newValue);
       // updateQty will handle the state update for us
     }
-  };
+  }
 
-  const handleNameChange = (event, monster) => {
+  function handleNameChange(event, monster) {
     const newName = event.target.value;
     setSelectedMonsters(
       selectedMonsters.map((m) => {
@@ -124,7 +156,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
         return { ...m, name: newName };
       })
     );
-  };
+  }
 
   function handleManualEntry() {
     // add new monster to selected monsters
@@ -137,6 +169,15 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
         qty: 1,
       },
     ]);
+  }
+
+  function handleDelete(monster) {
+    setSelectedMonsters((prev) => prev.filter((m) => m.id !== monster.id));
+    // setSelectedMonsters(
+    //   selectedMonsters.filter((m) => {
+    //     m.id !== monster.id;
+    //   })
+    // );
   }
 
   return (
@@ -197,6 +238,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
 
               <Combobox
                 value={selectedMonsters}
+                // onChange={setSelectedMonsters}
                 // onChange={(monsters) => {
                 //   // console.dir(e);
                 //   setSelectedMonsters(prev=>[...prev, monsters);
@@ -236,10 +278,11 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                         value={monster}
                         // onClick={() => selectMonster(monster)}
                         onClick={() =>
-                          setSelectedMonsters((prev) => [
-                            ...prev,
-                            { ...monster, qty: 1 },
-                          ])
+                          // setSelectedMonsters((prev) => [
+                          //   ...prev,
+                          //   { ...monster, qty: 1 },
+                          // ])
+                          handleSelectMonster(monster)
                         }
                         className={({ active }) =>
                           classNames(
@@ -257,6 +300,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                               )}
                             >
                               {monster.name}
+                              {monster.id}
                             </span>
 
                             {selected && (
@@ -267,7 +311,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                                 )}
                               >
                                 <CheckIcon
-                                  className="h-5 w-5"
+                                  className="h-5 w-5 text-black"
                                   aria-hidden="true"
                                 />
                               </span>
@@ -423,6 +467,24 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                                 <PlusSmallIcon className="w-4 h-4" />
                               </button>
                             </td>
+                            <td
+                              className={classNames(
+                                monsterIdx !== selectedMonsters.length - 1
+                                  ? "border-b border-gray-200"
+                                  : "",
+                                "relative whitespace-nowrap py-4 text-right w-12 text-sm font-medium sm:pr-6 lg:pr-8"
+                              )}
+                            >
+                              <button
+                                onClick={() => handleDelete(monster)}
+                                className="text-rose-600 hover:text-rose-900"
+                              >
+                                Delete
+                                <span className="sr-only">
+                                  , {monster.name}
+                                </span>
+                              </button>
+                            </td>
                             {/* <td
                                 className={classNames(
                                   personIdx !== people.length - 1
@@ -433,24 +495,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                               >
                                 {person.role}
                               </td>
-                              <td
-                                className={classNames(
-                                  personIdx !== people.length - 1
-                                    ? "border-b border-gray-200"
-                                    : "",
-                                  "relative whitespace-nowrap py-4 pr-4 pl-3 text-right text-sm font-medium sm:pr-8 lg:pr-8"
-                                )}
-                              >
-                                <a
-                                  href="#"
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                >
-                                  Edit
-                                  <span className="sr-only">
-                                    , {person.name}
-                                  </span>
-                                </a>
-                              </td> */}
+                             */}
                           </tr>
                         ))}
                       </tbody>
@@ -575,8 +620,3 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
     </Transition.Root>
   );
 }
-
-// className={classNames(
-//   "absolute inset-y-0 left-0 flex items-center pl-1.5",
-//   active ? "text-white" : "text-indigo-600"
-// )}

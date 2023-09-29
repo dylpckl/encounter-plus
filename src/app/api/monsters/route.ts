@@ -1,11 +1,10 @@
+import { nanoid } from "nanoid";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   const requestBody = await request.json();
   const name = requestBody.variables.name;
   const variables = { name: name };
-
-  // promise.all
 
   const query = `
     query Monsters($name: String) {
@@ -39,7 +38,13 @@ export async function POST(request: Request) {
     });
     const data = await res.json();
     // console.log(data);
-    return NextResponse.json(data.data.monsters);
+
+    const monstersWithId = data.data.monsters.map((monster) => ({
+      ...monster,
+      id: nanoid(),
+    }));
+
+    return NextResponse.json(monstersWithId);
     // return NextResponse.json(data.data.monsters);
   } catch (e) {
     // console.log("error!", e);
