@@ -1,6 +1,8 @@
 import { nanoid } from "nanoid";
 import { NextResponse } from "next/server";
 
+import Monster from "@/lib/monsterType";
+
 export async function POST(request: Request) {
   const requestBody = await request.json();
   const name = requestBody.variables.name;
@@ -39,7 +41,7 @@ export async function POST(request: Request) {
     const data = await res.json();
     // console.log(data);
 
-    const monstersWithId = data.data.monsters.map((monster) => ({
+    const monstersWithId = data.data.monsters.map((monster: Monster) => ({
       ...monster,
       id: nanoid(),
     }));
@@ -49,6 +51,6 @@ export async function POST(request: Request) {
   } catch (e) {
     // console.log("error!", e);
     console.error(e);
-    return new NextResponse({ status: 500 });
+    return new NextResponse(null, { status: 500 });
   }
 }
