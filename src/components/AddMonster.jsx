@@ -53,7 +53,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
       body: JSON.stringify({ variables: variables }),
     });
     const data = await res.json();
-    console.log(data)
+    // console.log(data);
     const monsterResultsWithFormFields = data.map((m) => {
       return { ...m, qty: 1 };
     });
@@ -171,11 +171,12 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
       ...selectedMonsters,
       {
         name: fromQuery ? query : null,
-        armor_class: null,
+        armor_class: [{ value: null }],
         hit_points: null,
         qty: 1,
       },
     ]);
+    console.log(selectedMonsters);
   }
 
   function handleDelete(monster) {
@@ -450,7 +451,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                                   data-lpignore="true"
                                   className="block w-12 rounded-md border-0 py-1.5 mx-auto text-center text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                   placeholder="you@example.com"
-                                  defaultValue={monster.armor_class[0].value}
+                                  // defaultValue={monster.armor_class[0]?.value}
                                   // onChange={(e) => handleNameChange(e, monster)}
                                 />
                               </td>
@@ -467,7 +468,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                                   name="hitPoints"
                                   id="hitPoints"
                                   data-lpignore="true"
-                                  className="block w-12 rounded-md border-0 py-1.5 mx-auto text-center text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                                  className="block w-14 rounded-md border-0 py-1.5 mx-auto text-center text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                   placeholder="you@example.com"
                                   defaultValue={monster.hit_points}
                                   // onChange={(e) => handleNameChange(e, monster)}
