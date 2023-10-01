@@ -279,58 +279,64 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                   </button>
                 </div>
                 {monsterResults.length > 0 && (
-                  <Combobox.Options
-                    static
-                    className="-mb-2 max-h-96 scroll-py-2 overflow-y-auto py-2 text-sm text-gray-800"
+                  <Transition
+                    enter="transition duration-300 ease-out"
+                    enterFrom="transform scale-95 opacity-0"
+                    enterTo="transform scale-100 opacity-100"
+                    leave="transition duration-150 ease-out"
+                    leaveFrom="transform scale-100 opacity-100"
+                    leaveTo="transform scale-95 opacity-0"
                   >
-                    {monsterResults.map((monster, idx) => (
-                      <Combobox.Option
-                        key={idx}
-                        value={monster}
-                        // onClick={() => selectMonster(monster)}
-                        onClick={() =>
-                          // setSelectedMonsters((prev) => [
-                          //   ...prev,
-                          //   { ...monster, qty: 1 },
-                          // ])
-                          handleSelectMonster(monster)
-                        }
-                        className={({ active }) =>
-                          classNames(
-                            "relative cursor-default select-none rounded-md px-4 pl-8 py-2",
-                            active && "bg-indigo-600 text-white"
-                          )
-                        }
-                      >
-                        {({ active, selected }) => (
-                          <>
-                            <span
-                              className={classNames(
-                                "block truncate",
-                                selected && "font-semibold"
-                              )}
-                            >
-                              {monster.name}
-                            </span>
-
-                            {selected && (
+                    <Combobox.Options className="-mb-2 max-h-96 scroll-py-2 overflow-y-auto py-2 text-sm text-gray-800">
+                      {monsterResults.map((monster, idx) => (
+                        <Combobox.Option
+                          key={idx}
+                          value={monster}
+                          // onClick={() => selectMonster(monster)}
+                          onClick={() =>
+                            // setSelectedMonsters((prev) => [
+                            //   ...prev,
+                            //   { ...monster, qty: 1 },
+                            // ])
+                            handleSelectMonster(monster)
+                          }
+                          className={({ active }) =>
+                            classNames(
+                              "relative cursor-default select-none rounded-md px-4 pl-8 py-2",
+                              active && "bg-indigo-600 text-white"
+                            )
+                          }
+                        >
+                          {({ active, selected }) => (
+                            <>
                               <span
                                 className={classNames(
-                                  "absolute inset-y-0 left-0 flex items-center pl-1.5",
-                                  active ? "text-white" : "text-indigo-600"
+                                  "block truncate",
+                                  selected && "font-semibold"
                                 )}
                               >
-                                <CheckIcon
-                                  className="h-5 w-5 text-black"
-                                  aria-hidden="true"
-                                />
+                                {monster.name}
                               </span>
-                            )}
-                          </>
-                        )}
-                      </Combobox.Option>
-                    ))}
-                  </Combobox.Options>
+
+                              {selected && (
+                                <span
+                                  className={classNames(
+                                    "absolute inset-y-0 left-0 flex items-center pl-1.5",
+                                    active ? "text-white" : "text-indigo-600"
+                                  )}
+                                >
+                                  <CheckIcon
+                                    className="h-5 w-5 text-black"
+                                    aria-hidden="true"
+                                  />
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </Combobox.Option>
+                      ))}
+                    </Combobox.Options>
+                  </Transition>
                 )}
 
                 {query !== "" && monsterResults.length === 0 && (
@@ -450,8 +456,8 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                                   id="armorClass"
                                   data-lpignore="true"
                                   className="block w-12 rounded-md border-0 py-1.5 mx-auto text-center text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                  placeholder="you@example.com"
-                                  // defaultValue={monster.armor_class[0]?.value}
+                                  placeholder="AC"
+                                  defaultValue={monster.armor_class[0]?.value}
                                   // onChange={(e) => handleNameChange(e, monster)}
                                 />
                               </td>
@@ -469,7 +475,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                                   id="hitPoints"
                                   data-lpignore="true"
                                   className="block w-14 rounded-md border-0 py-1.5 mx-auto text-center text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                                  placeholder="you@example.com"
+                                  placeholder="HP"
                                   defaultValue={monster.hit_points}
                                   // onChange={(e) => handleNameChange(e, monster)}
                                 />
