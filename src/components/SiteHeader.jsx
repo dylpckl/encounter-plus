@@ -7,7 +7,7 @@ import Link from "next/link";
 import useOnClickOutside from "@/lib/hooks/useOnClickOutside";
 
 export default function SiteHeader({ encounters }) {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   // const [open, setOpen] = useState(false);
   // const sidebarRef = useRef(null);
   // useOnClickOutside(sidebarRef, () => setSidebarOpen(false));
