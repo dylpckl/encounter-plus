@@ -31,7 +31,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const encounters = await getEncounters();
-  console.log(encounters);
+  // console.log(encounters);
   // const { data: encounters } = await supabase.from("encounter").select("*");
   // console.log(encounters);
 

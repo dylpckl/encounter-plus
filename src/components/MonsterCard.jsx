@@ -1,24 +1,8 @@
 "use client";
 
 import { useState, forwardRef } from "react";
-// import clsx from "clsx";
-
-const CONDITIONS = [
-  "BLND",
-  "CHRM",
-  "DEAF",
-  "FRGHT",
-  "GRPL",
-  "INCAP",
-  "INVIS",
-  "PRLZ",
-  "PETR",
-  "POIS",
-  "PRNE",
-  "REST",
-  "STUN",
-  "UNCON",
-];
+import { CONDITIONS } from "@/lib/constants";
+import { Transition } from "@headlessui/react";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -128,23 +112,15 @@ const MonsterCard = forwardRef(
         >
           <div className="flex w-full gap-4">
             {/* Init */}
-            <div className="">
-              {/* <label
-            htmlFor="init"
-            className="text-sm"
-          >
-            Init.
-          </label> */}
-              <input
-                id="init"
-                onChange={(e) => onInitChange(monster, e)}
-                className="block w-12 h-8 text-center rounded-md border-0 p-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                type="number"
-                value={monster.init}
-                min="0"
-                step="1"
-              />
-            </div>
+            <input
+              id="init"
+              onChange={(e) => onInitChange(monster, e)}
+              className="block w-12 h-8 text-center rounded-md border-0 p-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              type="number"
+              value={monster.init}
+              min="0"
+              step="1"
+            />
 
             {/* Details */}
             <div className="flex flex-col w-full">
@@ -155,16 +131,6 @@ const MonsterCard = forwardRef(
               >
                 {monster.name}
               </h2>
-
-              {/* <span className="text-xs">
-            <span className="text-slate-300">AC</span>{" "}
-            {monster.armor_class[0].value}
-          </span> */}
-              {/* <ul>
-            {monster.damage_resistances.map((resist, index) => (
-              <li key={index}>{resist}</li>
-            ))}
-          </ul> */}
 
               <ul className="flex flex-wrap gap-x-2 text-xs">
                 <span className="text-slate-300">AC</span>{" "}
@@ -191,7 +157,6 @@ const MonsterCard = forwardRef(
 
             {/* HP */}
             <div className="">
-              {/* <label htmlFor="hp">HP</label> */}
               <div className="flex items-center gap-2">
                 <input
                   id="hp"
@@ -237,7 +202,17 @@ const MonsterCard = forwardRef(
             </div>
           </div>
 
-          <div>
+          <Transition
+            appear={true}
+            unmount={false}
+            show={conditionsOpen}
+            enter="transition ease-in-out duration-200 transform"
+            enterFrom="opacity-0 -translate-y-full"
+            enterTo="opacity-100 translate-y-0"
+            leave="transition ease-in-out duration-200 transform"
+            leaveFrom="opacity-100 translate-y-0"
+            leaveTo="opacity-0 -translate-y-full"
+          >
             {conditionsOpen && (
               <ul className="flex gap-1 flex-wrap mt-2">
                 {CONDITIONS.sort().map((cond) => (
@@ -263,9 +238,7 @@ const MonsterCard = forwardRef(
                 </button>
               </ul>
             )}
-          </div>
-          {/* <HitPointPopover /> */}
-          {/* <button onClick={() => onOpenHPPopover(true)}>open hp</button> */}
+          </Transition>
         </div>
       </>
     );

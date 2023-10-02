@@ -1,0 +1,16 @@
+export const CONDITIONS = [
+    "BLND",
+    "CHRM",
+    "DEAF",
+    "FRGHT",
+    "GRPL",
+    "INCAP",
+    "INVIS",
+    "PRLZ",
+    "PETR",
+    "POIS",
+    "PRNE",
+    "REST",
+    "STUN",
+    "UNCON",
+];

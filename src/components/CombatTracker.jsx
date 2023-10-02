@@ -11,7 +11,6 @@ import {
 } from "react";
 import { nanoid } from "nanoid";
 import { Dialog, Transition, Switch } from "@headlessui/react";
-import clsx from "clsx";
 
 // Components
 import SearchBar from "@/components/SearchBar";
@@ -37,6 +36,7 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { type } from "os";
+import path from "path";
 
 function debounce(func, delay) {
   let timerId;
@@ -69,7 +69,7 @@ const CHARACTERS = [
   },
 ];
 
-export default function CombatTracker() {
+export default function CombatTracker({ encounter }) {
   const [query, setQuery] = useState("");
   // const [addMonstersOpen, setAddMonstersOpen] = useState(false);
 
@@ -98,6 +98,9 @@ export default function CombatTracker() {
   //     ? JSON.parse(localStorage.getItem("combatActive") === true)
   //     : false;
   // });
+
+  // const pathname = usePathname();
+  // console.log(pathname);
 
   const [showHPPopover, setShowHPPopover] = useState(false);
   const [monsterResults, setMonsterResults] = useState([]);
@@ -948,6 +951,7 @@ export default function CombatTracker() {
         open={addMonstersOpen}
         setOpen={setAddMonstersOpen}
         onAddMonsters={onAddMonsters}
+        encounter={encounter}
       />
       <ManageCharacters />
       {/* Header */}
