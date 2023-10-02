@@ -11,8 +11,6 @@ import {
 } from "react";
 import { nanoid } from "nanoid";
 import { Dialog, Transition, Switch } from "@headlessui/react";
-import clsx from "clsx";
-import { usePathname } from "next/navigation";
 
 // Components
 import SearchBar from "@/components/SearchBar";
