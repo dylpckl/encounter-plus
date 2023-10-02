@@ -40,7 +40,12 @@ const TEST = [
 //    -
 //    -
 
-export default function AddMonster({ open, setOpen, onAddMonsters }) {
+export default function AddMonster({
+  open,
+  setOpen,
+  onAddMonsters,
+  encounter,
+}) {
   const [query, setQuery] = useState("");
   const [monsterResults, setMonsterResults] = useState("");
   const [selectedMonsters, setSelectedMonsters] = useState([]);
@@ -230,7 +235,7 @@ export default function AddMonster({ open, setOpen, onAddMonsters }) {
                 as="h3"
                 className="flex justify-between text-base font-semibold leading-6 text-gray-900 px-4 py-5"
               >
-                Add Monsters to encounter_name
+                Add Monsters to {encounter.title}
                 {/* <button
                   type="button"
                   className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
