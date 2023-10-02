@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { supabase } from "@/lib/supabase";
 import SiteHeader from "@/components/SiteHeader";
-
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase/config";
+import { Encounter } from "@/lib/types/encounter";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,11 +15,12 @@ export const metadata: Metadata = {
 };
 
 async function getEncounters() {
-  let encounters = [];
+  let encounters: Encounter[] = [];
   const querySnapshot = await getDocs(collection(db, "encounters"));
   querySnapshot.forEach((doc) => {
-    console.log(doc.id);
-    encounters.push(doc.data());
+    // console.log(doc.id);
+    const encounterData = doc.data() as Encounter;
+    encounters.push({ ...encounterData, id: doc.id });
   });
   return encounters;
 }
@@ -30,6 +31,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const encounters = await getEncounters();
+  console.log(encounters);
   // const { data: encounters } = await supabase.from("encounter").select("*");
   // console.log(encounters);
 
