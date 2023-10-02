@@ -69,7 +69,7 @@ const CHARACTERS = [
   },
 ];
 
-export default function Home() {
+export default function CombatTracker() {
   // State
   const [query, setQuery] = useState("");
   // const [addMonstersOpen, setAddMonstersOpen] = useState(false);
@@ -103,7 +103,7 @@ export default function Home() {
   const [showHPPopover, setShowHPPopover] = useState(false);
   const [monsterResults, setMonsterResults] = useState([]);
   const [monstersToAdd, setMonstersToAdd] = useState([]);
-  const [addMonstersOpen, setAddMonstersOpen] = useState(true);
+  const [addMonstersOpen, setAddMonstersOpen] = useState(false);
 
   const sortedMonsters = activeMonsters.sort((a, b) => b.init - a.init);
   const initiative = [...activeMonsters, ...characters];

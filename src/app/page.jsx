@@ -15,8 +15,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 // Components
-import InitTracker from "@/components/InitTracker";
-import Encounters from "@/components/Encounters";
+import CombatTracker from "@/components/CombatTracker";
 
 const projects = [
   { id: 1, name: "Workflow Inc. / Website Redesign", url: "#" },
@@ -368,24 +367,6 @@ export default function Home() {
   return (
     <>
       <CommandPalette />
-      <ManageParty />
-      {/* <AddMonster /> */}
-      <div className="bg-sky-600 absolute top-12 z-20 h-6 col-span-full">
-        <button
-          className="h-6"
-          onClick={() => setManagePartyOpen(true)}
-        >
-          manage party
-        </button>
-        {/* <button
-          className="h-6"
-          onClick={() => setAddMonstersOpen(true)}
-        >
-          add monsters
-        </button> */}
-      </div>
-      <InitTracker />
-      <Encounters />
     </>
   );
 }
