@@ -70,7 +70,6 @@ const CHARACTERS = [
 ];
 
 export default function CombatTracker() {
-  // State
   const [query, setQuery] = useState("");
   // const [addMonstersOpen, setAddMonstersOpen] = useState(false);
 
@@ -969,8 +968,8 @@ export default function CombatTracker() {
           </button>
         </div> */}
         <CombatSwitch />
-        <button onClick={handleSave}>save</button>
-        <button onClick={getData}>get</button>
+        {/* <button onClick={handleSave}>save</button>
+        <button onClick={getData}>get</button> */}
         {/* Button Group */}
         <span className="isolate inline-flex rounded-md shadow-sm">
           <button
@@ -1045,18 +1044,3 @@ export default function CombatTracker() {
     </div>
   );
 }
-
-// {sortedInitiative.map((monster, index) => (
-//   <li key={monster.id}>
-//     {/* <span>{index}</span> */}
-//     <MonsterCard
-//       ref={index === activeMonsterIndex ? activeMonsterCardRef : null}
-//       monster={monster}
-//       onKill={handleKill}
-//       onDelete={handleDeleteMonster}
-//       onInitChange={handleMonsterInitChange}
-//       onSetCondition={handleMonsterCondition}
-//       onOpenHPPopover={setShowHPPopover}
-//     />
-//   </li>
-// ))}
