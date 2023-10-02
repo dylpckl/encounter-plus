@@ -78,20 +78,23 @@ export default function SiteHeader({ encounters }) {
                   </div>
                 </div>
                 <div className="relative mt-6 flex flex-1 px-4 sm:px-6">
-                  {/* {encounters.map((e) => (
-                    <li>{e.id}</li>
-                  ))} */}
-                  <Link
+                  {encounters.map((encounter) => (
+                    <Link
+                      href={`/e/${encounter.id}`}
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      {encounter.title}
+                    </Link>
+                  ))}
+                  {/* <Link
                     href="/e/1"
                     onClick={() => setSidebarOpen(false)}
                   >
                     encounter1
-                  </Link>
+                  </Link> */}
                   {/* <button onClick={setSidebarOpen(false)}>
                   </button> */}
-                  <div className="">
-
-                  </div>
+                  <div className=""></div>
                 </div>
               </div>
             </Dialog.Panel>
