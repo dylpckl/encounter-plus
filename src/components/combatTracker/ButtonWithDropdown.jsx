@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import {
@@ -10,59 +10,67 @@ import {
   UserPlusIcon,
 } from "@heroicons/react/24/outline";
 
-const items = [
-  {
-    name: "Restart",
-    href: "#",
-    icon: (
-      <ArrowPathIcon
-        className="mr-3 h-5 w-5 group-hover:text-gray-500"
-        aria-hidden="true"
-      />
-    ),
-  },
-  {
-    name: "Clear Initiative",
-    href: "#",
-    icon: (
-      <MinusCircleIcon
-        className="mr-3 h-5 w-5 group-hover:text-gray-500"
-        aria-hidden="true"
-      />
-    ),
-  },
-  {
-    name: "Add Monsters",
-    href: "#",
-    icon: (
-      <BugAntIcon
-        className="mr-3 h-5 w-5 group-hover:text-gray-500"
-        aria-hidden="true"
-      />
-    ),
-  },
-  {
-    name: "Add Characters",
-    href: "#",
-    icon: (
-      <UserPlusIcon
-        className="mr-3 h-5 w-5 group-hover:text-gray-500"
-        aria-hidden="true"
-      />
-    ),
-  },
-];
-
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function Example() {
-  // <StopIcon
+export default function Example({
+  combatActive,
+  setCombatActive,
+  onAddMonsters,
+  onAddCharacters,
+  onRestartCombat,
+  onClearInitiative,
+}) {
+  const items = [
+    {
+      name: "Add Monsters",
+      onClick: onAddMonsters,
+      icon: (
+        <BugAntIcon
+          className="mr-3 h-5 w-5 group-hover:text-gray-500"
+          aria-hidden="true"
+        />
+      ),
+    },
+    {
+      name: "Add Characters",
+      onClick: onAddCharacters,
+      icon: (
+        <UserPlusIcon
+          className="mr-3 h-5 w-5 group-hover:text-gray-500"
+          aria-hidden="true"
+        />
+      ),
+    },
+    {
+      name: "Restart",
+      onClick: onRestartCombat,
+
+      icon: (
+        <ArrowPathIcon
+          className="mr-3 h-5 w-5 group-hover:text-gray-500"
+          aria-hidden="true"
+        />
+      ),
+    },
+    {
+      name: "Clear Initiative",
+      onClick: onClearInitiative,
+      icon: (
+        <MinusCircleIcon
+          className="mr-3 h-5 w-5 group-hover:text-gray-500"
+          aria-hidden="true"
+        />
+      ),
+    },
+  ];
+
   return (
     <div className="inline-flex rounded-md shadow-sm">
       <button
         type="button"
+        onClick={setCombatActive}
         className="relative inline-flex items-center gap-x-1.5 rounded-l-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
       >
         <PlayIcon
@@ -97,18 +105,18 @@ export default function Example() {
                 <Fragment key={item.name}>
                   <Menu.Item>
                     {({ active }) => (
-                      <a
-                        href={item.href}
+                      <button
+                        onClick={item.onClick}
                         className={classNames(
                           active
                             ? "bg-gray-100 text-gray-900"
                             : "text-gray-700",
-                          "group flex items-center px-4 py-2 text-sm"
+                          "w-full group flex items-center px-4 py-2 text-sm"
                         )}
                       >
                         {item.icon && <span className="mr-2">{item.icon}</span>}
                         {item.name}
-                      </a>
+                      </button>
                     )}
                   </Menu.Item>
                   {/* {idx < array.length - 2 && (

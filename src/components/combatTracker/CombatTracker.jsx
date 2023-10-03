@@ -13,11 +13,11 @@ import { nanoid } from "nanoid";
 import { Dialog, Transition, Switch } from "@headlessui/react";
 
 // Components
-import MonsterCard from "@/components/MonsterCard";
-import CharacterCard from "@/components/CharacterCard";
-import AddMonster from "@/components/AddMonster";
-import ButtonWithDropdown from "@/components/ButtonWithDropdown";
-import ButtonGroup from "@/components/ButtonGroup";
+import MonsterCard from "@/components/combatTracker/MonsterCard";
+import CharacterCard from "@/components/combatTracker/CharacterCard";
+import AddMonster from "@/components/combatTracker/AddMonster";
+import ButtonWithDropdown from "@/components/combatTracker/ButtonWithDropdown";
+import ButtonGroup from "@/components/combatTracker/ButtonGroup";
 
 // Utils
 import rollInitiative from "@/lib/rollInitiative";
@@ -864,9 +864,16 @@ export default function CombatTracker({ encounter }) {
       </div>
 
       {/* Actions */}
-      <div className="flex items-center w-full h-12 bg-sky-300">
+      <div className="flex items-center px-4 py-3 justify-between w-full h-12 bg-sky-300">
+        <ButtonWithDropdown
+          combatActive={combatActive}
+          setCombatActive={setCombatActive}
+          onAddMonsters={() => setAddMonstersOpen(true)}
+          onAddCharacters={() => setManageCharactersOpen(true)}
+          // onRestartCombat={}
+          // onClearInitiative={}
+        />
         <ButtonGroup />
-        <ButtonWithDropdown />
       </div>
 
       {/* Body */}

@@ -1,4 +1,4 @@
-import CombatTracker from "@/components/CombatTracker";
+import CombatTracker from "@/components/combatTracker/CombatTracker";
 
 import { db } from "@/firebase/config";
 import { doc, getDoc } from "firebase/firestore";
