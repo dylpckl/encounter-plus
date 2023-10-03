@@ -16,8 +16,9 @@ import { Dialog, Transition, Switch } from "@headlessui/react";
 import MonsterCard from "@/components/combatTracker/MonsterCard";
 import CharacterCard from "@/components/combatTracker/CharacterCard";
 import AddMonster from "@/components/combatTracker/AddMonster";
-import ButtonWithDropdown from "@/components/combatTracker/ButtonWithDropdown";
-import ButtonGroup from "@/components/combatTracker/ButtonGroup";
+import CombatTrackerActionGroup from "@/components/combatTracker/CombatTrackerActionGroup";
+import TurnButtonGroup from "@/components/combatTracker/TurnButtonGroup";
+import Stopwatch from "@/components/combatTracker/Stopwatch";
 
 // Utils
 import rollInitiative from "@/lib/rollInitiative";
@@ -81,6 +82,9 @@ export default function CombatTracker({ encounter }) {
   //     : [];
   // });
 
+  const [time, setTime] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+
   const [activeMonsters, setActiveMonsters] = useState([]);
 
   useEffect(() => {
@@ -116,6 +120,14 @@ export default function CombatTracker({ encounter }) {
       // setCombatActive(storedCombatActive);
     }
   }, []);
+
+  useEffect(() => {
+    let intervalId;
+    if (isRunning) {
+      intervalId = setInterval(() => setTime((t) => t + 1), 1000);
+    }
+    return () => clearInterval(intervalId);
+  }, [isRunning]);
 
   const [roundCtr, setRoundCtr] = useState(1);
   // const [roundCtr, setRoundCtr] = useState(() => {
@@ -183,6 +195,9 @@ export default function CombatTracker({ encounter }) {
   //   }
   // }, []);
 
+  // EVENT HANDLERS ------------------------------------------------------
+  // These are sent down to child components as props
+  // ---------------------------------------------------------------------
   function handleSave() {
     console.log(window.localStorage);
     if (typeof window !== "undefined" && window.localStorage) {
@@ -198,10 +213,6 @@ export default function CombatTracker({ encounter }) {
       setActiveMonsters(mon);
     }
   }
-
-  // EVENT HANDLERS ------------------------------------------------------
-  // These are sent down to child components as props
-  // ---------------------------------------------------------------------
 
   function toggleCombat() {
     if (combatActive) {
@@ -757,6 +768,7 @@ export default function CombatTracker({ encounter }) {
   }
 
   function startCombat() {
+    console.log("combat starting");
     const sortedMonsters = activeMonsters
       .slice()
       .sort((a, b) => b.init - a.init);
@@ -769,7 +781,24 @@ export default function CombatTracker({ encounter }) {
 
     setActiveMonsters(updatedMonsters);
     setCombatActive(true);
+    setTime(1);
+    setIsRunning(true);
     // setActiveMonsterIndex(0); // Set the active monster index to 0
+  }
+
+  function stopCombat() {
+    console.log("combat stopping");
+    const updatedMonsters = activeMonsters.map((monster) => ({
+      ...monster,
+      active: false,
+    }));
+
+    setActiveMonsters(updatedMonsters);
+    setCombatActive(false);
+    setTime(0);
+    setIsRunning(false);
+    // Optionally, you can reset the active monster index to -1 or another value.
+    // setActiveMonsterIndex(-1);
   }
 
   function nextTurn() {
@@ -808,7 +837,7 @@ export default function CombatTracker({ encounter }) {
     }
   }
 
-  function previousTurn() {
+  function prevTurn() {
     const activeIndex = activeMonsters.findIndex((monster) => monster.active);
 
     if (activeIndex !== -1) {
@@ -844,10 +873,7 @@ export default function CombatTracker({ encounter }) {
   }
 
   return (
-    <div
-      className="bg-slate-600 rounded-lg col-span-6 row-span-6 m-5 flex flex-col items-center relative"
-      // suppressHydrationWarning={true}
-    >
+    <div className="bg-slate-600 rounded-lg col-span-6 row-span-6 m-5 flex flex-col items-center relative">
       <AddMonster
         open={addMonstersOpen}
         setOpen={setAddMonstersOpen}
@@ -864,16 +890,61 @@ export default function CombatTracker({ encounter }) {
       </div>
 
       {/* Actions */}
-      <div className="flex items-center px-4 py-3 justify-between w-full h-12 bg-sky-300">
-        <ButtonWithDropdown
-          combatActive={combatActive}
-          setCombatActive={setCombatActive}
-          onAddMonsters={() => setAddMonstersOpen(true)}
-          onAddCharacters={() => setManageCharactersOpen(true)}
-          // onRestartCombat={}
-          // onClearInitiative={}
-        />
-        <ButtonGroup />
+      <div className="w-full px-4 py-3 border-b border-slate-400">
+        <div className="flex items-center justify-between h-12 ">
+          <CombatTrackerActionGroup
+            combatActive={combatActive}
+            onSetCombatActive={
+              // test
+              () => {
+                // setCombatActive(!combatActive);
+                setCombatActive((prevCombatActive) => {
+                  const newCombatActive = !prevCombatActive;
+                  if (newCombatActive) {
+                    startCombat();
+                  } else {
+                    stopCombat();
+                  }
+                  return newCombatActive;
+                });
+              }
+              // combatActive === true ? startCombat() : stopCombat();
+              // });
+              // setCombatActive((prev) => {
+              //   // if combatActive, stopCombat, otherwise startCombat
+              //   prev ? stopCombat() : startCombat();
+              //   // console.log(activeMonsterIndex);
+              //   return !prev;
+              // });
+            }
+            onAddMonsters={() => setAddMonstersOpen(true)}
+            onAddCharacters={() => setManageCharactersOpen(true)}
+
+            // onRestartCombat={}
+            // onClearInitiative={}
+          />
+          <TurnButtonGroup
+            combatActive={combatActive}
+            onNextTurn={() => nextTurn()}
+            onPrevTurn={() => prevTurn()}
+          />
+        </div>
+        <div className="flex justify-between">
+          <ClockIcon
+            className="h-5 w-5"
+            aria-hidden="true"
+          />
+          <span>round</span>
+          {roundCtr}
+          {time}
+          <Stopwatch
+            time={time}
+          />
+          <HeartIcon
+            className="h-5 w-5"
+            aria-hidden="true"
+          />
+        </div>
       </div>
 
       {/* Body */}
