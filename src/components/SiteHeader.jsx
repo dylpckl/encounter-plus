@@ -6,17 +6,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { doc, setDoc, addDoc, collection } from "firebase/firestore";
 import { db } from "@/firebase/config";
-
+import { usePathname } from "next/navigation";
 import useOnClickOutside from "@/lib/hooks/useOnClickOutside";
 
 export default function SiteHeader({ encounters }) {
-  console.log(encounters);
+  // console.log(encounters);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
   // const [open, setOpen] = useState(false);
   // const sidebarRef = useRef(null);
   // useOnClickOutside(sidebarRef, () => setSidebarOpen(false));
   // https://www.youtube.com/watch?v=-I5P0J_Tv80
+
+  const pathname = usePathname();
+
   async function createEncounter() {
     const newEncounterRef = await addDoc(collection(db, "encounters"), {
       title: "new",
@@ -30,14 +33,10 @@ export default function SiteHeader({ encounters }) {
   }
 
   const Sidebar = () => {
-    // useEffect(() => {
-    //   setSidebarOpen(false);
-    // }, [setSidebarOpen]);
     return (
       <Transition
         show={sidebarOpen}
         as={Fragment}
-        appear
       >
         <Dialog
           as="div"
@@ -95,13 +94,23 @@ export default function SiteHeader({ encounters }) {
                       role="list"
                       className="-mx-2 space-y-1"
                     >
-                      {encounters.map((encounter) => (
-                        <li key={encounter.id}>
-                          <Link href={`/e/${encounter.id}`}>
-                            {encounter.title}
-                          </Link>
-                        </li>
-                      ))}
+                      {encounters.map((encounter) => {
+                        const isActive = pathname === `/e/${encounter.id}`;
+
+                        // console.log(pathname, isActive);
+                        return (
+                          <li key={encounter.id}>
+                            <Link
+                              href={`/e/${encounter.id}`}
+                              className={
+                                isActive ? "text-red-500" : "text-black"
+                              }
+                            >
+                              {encounter.title}
+                            </Link>
+                          </li>
+                        );
+                      })}
                       <div className="mt-6 bg-sky-300">
                         <button onClick={createEncounter}>create new</button>
                       </div>

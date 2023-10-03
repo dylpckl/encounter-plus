@@ -13,12 +13,8 @@ import { nanoid } from "nanoid";
 import { Dialog, Transition, Switch } from "@headlessui/react";
 
 // Components
-import SearchBar from "@/components/SearchBar";
-import SearchResults from "@/components/SearchResults";
 import MonsterCard from "@/components/MonsterCard";
 import CharacterCard from "@/components/CharacterCard";
-import HitPointPopover from "@/components/HitPointPopover";
-import CharacterInputs from "@/components/CharacterInputs";
 import AddMonster from "@/components/AddMonster";
 
 // Utils
@@ -35,8 +31,6 @@ import {
   XMarkIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import { type } from "os";
-import path from "path";
 
 function debounce(func, delay) {
   let timerId;
@@ -71,8 +65,6 @@ const CHARACTERS = [
 
 export default function CombatTracker({ encounter }) {
   const [query, setQuery] = useState("");
-  // const [addMonstersOpen, setAddMonstersOpen] = useState(false);
-
   const [manageCharactersOpen, setManageCharactersOpen] = useState(false);
   const [characters, setCharacters] = useState([]);
   // const [characters, setCharacters] = useState(() => {
@@ -80,12 +72,49 @@ export default function CombatTracker({ encounter }) {
   //     ? JSON.parse(window.localStorage.getItem("characters"))
   //     : [];
   // });
-  const [activeMonsters, setActiveMonsters] = useState([]);
-  // const [activeMonsters, setActiveMonsters] = useState(() => {
+
+  // const [localActiveMonsters] = useState(() => {
   //   return typeof window !== "undefined"
   //     ? JSON.parse(window.localStorage.getItem("activeMonsters"))
   //     : [];
   // });
+
+  const [activeMonsters, setActiveMonsters] = useState([]);
+
+  useEffect(() => {
+    // let storedData = localStorage.getItem("activeMonsters");
+
+    // // Check if the storedData is the string "undefined"
+    // if (storedData === "undefined") {
+    //   return; // Do nothing if the storedData is "undefined"
+    // }
+
+    // try {
+    //   let mon = JSON.parse(storedData);
+    //   setActiveMonsters(mon);
+    // } catch (error) {
+    //   console.error("Error parsing JSON:", error);
+    //   // Handle the error, e.g., set default values or clear localStorage
+    // }
+
+    if (typeof window !== "undefined" && window.localStorage) {
+      console.log(typeof window, window.localStorage);
+      let storedCharacters = JSON.parse(
+        window.localStorage.getItem("characters")
+      );
+      let storedMonsters = JSON.parse(localStorage.getItem("activeMonsters"));
+      let storedRoundCtr = JSON.parse(window.localStorage.getItem("roundCtr"));
+      let storedCombatActive = JSON.parse(
+        localStorage.getItem("combatActive") === true
+      );
+
+      setActiveMonsters(storedMonsters);
+      // setCharacters(storedCharacters);
+      // setRoundCtr(storedRoundCtr);
+      // setCombatActive(storedCombatActive);
+    }
+  }, []);
+
   const [roundCtr, setRoundCtr] = useState(1);
   // const [roundCtr, setRoundCtr] = useState(() => {
   //   return typeof window !== "undefined"
@@ -99,52 +128,58 @@ export default function CombatTracker({ encounter }) {
   //     : false;
   // });
 
-  // const pathname = usePathname();
-  // console.log(pathname);
-
   const [showHPPopover, setShowHPPopover] = useState(false);
   const [monsterResults, setMonsterResults] = useState([]);
   const [monstersToAdd, setMonstersToAdd] = useState([]);
   const [addMonstersOpen, setAddMonstersOpen] = useState(false);
 
-  const sortedMonsters = activeMonsters.sort((a, b) => b.init - a.init);
-  const initiative = [...activeMonsters, ...characters];
+  // const sortedMonsters = activeMonsters.sort((a, b) => b.init - a.init);
+  const initiative =
+    activeMonsters && activeMonsters.length > 0
+      ? [...activeMonsters, ...characters]
+      : [];
   const sortedInitiative = initiative.sort((a, b) => b.init - a.init);
+
   const debouncedSearch = useDebounce(query);
   const activeMonsterCardRef = useRef(null);
-  const activeMonsterIndex = activeMonsters.findIndex(
-    (monster) => monster.active === true
-  );
+  const activeMonsterIndex = activeMonsters
+    ? activeMonsters.findIndex((monster) => monster.active === true)
+    : null;
 
-  //
-  // https://nextjs.org/docs/messages/react-hydration-error
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.localStorage) {
-      let storedCharacters = JSON.parse(
-        window.localStorage.getItem("characters")
-      );
-      let storedMonsters = JSON.parse(localStorage.getItem("activeMonsters"));
-      let storedRoundCtr = JSON.parse(window.localStorage.getItem("roundCtr"));
-      let storedCombatActive = JSON.parse(
-        localStorage.getItem("combatActive") === true
-      );
-
-      setActiveMonsters(storedMonsters);
-      setCharacters(storedCharacters);
-      setRoundCtr(storedRoundCtr);
-      setCombatActive(storedCombatActive);
-    }
-  }, []);
-
+  // https://github.com/vercel/next.js/discussions/49131#discussioncomment-6365650
   // https://articles.wesionary.team/using-localstorage-with-next-js-a-beginners-guide-7fc4f8bfd9dc
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.localStorage) {
-      localStorage.setItem("activeMonsters", JSON.stringify(activeMonsters));
-      localStorage.setItem("combatActive", JSON.stringify(combatActive));
-      localStorage.setItem("characters", JSON.stringify(characters));
-      // setActiveMonsters(activeMonsters);
-    }
-  }, [activeMonsters, combatActive, characters]);
+  // useEffect(() => {
+  //   if (typeof window !== "undefined" && window.localStorage) {
+  //     localStorage.setItem("activeMonsters", JSON.stringify(activeMonsters));
+  //     // localStorage.setItem("combatActive", JSON.stringify(combatActive));
+  //     // localStorage.setItem("characters", JSON.stringify(characters));
+  //   }
+  //   // setActiveMonsters(activeMonsters);
+  //   // console.log("saving...", window.localStorage);
+  // }, [localActiveMonsters, activeMonsters]);
+
+  // https://nextjs.org/docs/messages/react-hydration-error
+  // useEffect(() => {
+  //   console.log("mount");
+  //   if (typeof window !== "undefined" && window.localStorage) {
+  //     console.log(typeof window, window.localStorage);
+  //     let storedCharacters = JSON.parse(
+  //       window.localStorage.getItem("characters")
+  //     );
+  //     let storedMonsters = JSON.parse(localStorage.getItem("activeMonsters"));
+  //     let storedRoundCtr = JSON.parse(window.localStorage.getItem("roundCtr"));
+  //     let storedCombatActive = JSON.parse(
+  //       localStorage.getItem("combatActive") === true
+  //     );
+
+  //     setLocalActiveMonsters(storedMonsters);
+  //     // setCharacters(storedCharacters);
+  //     // setRoundCtr(storedRoundCtr);
+  //     // setCombatActive(storedCombatActive);
+
+  //     // console.log(activeMonsters);
+  //   }
+  // }, []);
 
   function handleSave() {
     console.log(window.localStorage);
@@ -945,7 +980,10 @@ export default function CombatTracker({ encounter }) {
   }
 
   return (
-    <div className="bg-slate-600 rounded-lg col-span-6 row-span-6 m-5 flex flex-col items-center relative">
+    <div
+      className="bg-slate-600 rounded-lg col-span-6 row-span-6 m-5 flex flex-col items-center relative"
+      suppressHydrationWarning={true}
+    >
       {/* <AddMonster /> */}
       <AddMonster
         open={addMonstersOpen}
@@ -972,8 +1010,8 @@ export default function CombatTracker({ encounter }) {
           </button>
         </div> */}
         <CombatSwitch />
-        {/* <button onClick={handleSave}>save</button>
-        <button onClick={getData}>get</button> */}
+        <button onClick={handleSave}>save</button>
+        <button onClick={getData}>get</button>
         {/* Button Group */}
         <span className="isolate inline-flex rounded-md shadow-sm">
           <button
@@ -1020,11 +1058,20 @@ export default function CombatTracker({ encounter }) {
       </div>
 
       {/* Body */}
-      <div className="overflow-y-auto overflow-x-hidden h-full w-full p-3">
-        <ul className="w-full flex flex-col space-y-2">
+      <div
+        className="overflow-y-auto overflow-x-hidden h-full w-full p-3"
+        suppressHydrationWarning={true}
+      >
+        <ul
+          className="w-full flex flex-col space-y-2"
+          suppressHydrationWarning={true}
+        >
           {sortedInitiative.map((monster, index) => {
             return (
-              <li key={monster.id}>
+              <li
+                key={monster.id}
+                suppressHydrationWarning={true}
+              >
                 {monster.type === "monster" ? (
                   <MonsterCard
                     ref={
