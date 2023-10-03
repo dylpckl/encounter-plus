@@ -49,9 +49,11 @@ export default function AddMonster({
   const [query, setQuery] = useState("");
   const [monsterResults, setMonsterResults] = useState("");
   const [selectedMonsters, setSelectedMonsters] = useState([]);
+  const [loading, setLoading] = useState(false);
   const debouncedSearch = useDebounce(query);
 
   const fetchMonsters = async (value) => {
+    setLoading(true);
     const variables = { name: value };
     const res = await fetch("/api/monsters", {
       method: "POST",
@@ -63,6 +65,7 @@ export default function AddMonster({
       return { ...m, qty: 1 };
     });
     setMonsterResults(monsterResultsWithFormFields);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -343,8 +346,16 @@ export default function AddMonster({
                     </Combobox.Options>
                   </Transition>
                 )}
+                {/* {loading && (
+                  <div>
+                    <div className="flex items-center justify-center inset-0">
+                      <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-green-500"></div>
+                    </div>
 
-                {query !== "" && monsterResults.length === 0 && (
+                    <p className="mt-4 text-sm text-gray-900">Loading...</p>
+                  </div>
+                )} */}
+                {query !== "" && monsterResults.length === 0 && !loading && (
                   <div className="px-4 py-14 text-center sm:px-14">
                     <UsersIcon
                       className="mx-auto h-6 w-6 text-gray-400"
@@ -549,92 +560,6 @@ export default function AddMonster({
                     </div>
                   </div>
                 </div>
-                // <div className="max-h-72 overflow-y-auto">
-                //   <div className="flex w-full">
-                //     <div className="flex items-center gap-2 p-4 w-2/3">
-                //       <span className="block w-full text-sm font-medium leading-6 text-gray-900">
-                //         name
-                //       </span>
-                //       <span className="block w-12 text-sm font-medium leading-6 text-gray-900">
-                //         ac
-                //       </span>
-                //       <span className="block w-12 text-sm font-medium leading-6 text-gray-900">
-                //         hp
-                //       </span>
-                //     </div>
-
-                //     <div className="w-1/3 justify-end">
-                //       <span className="block w-12 text-sm font-medium leading-6 text-gray-900">
-                //         qty
-                //       </span>
-                //     </div>
-                //   </div>
-                //   <ul
-                //     role="list"
-                //     className="divide-y divide-gray-100 text-gray-400 p-4"
-                //   >
-                //     {selectedMonsters.map((monster) => (
-                //       <li
-                //         key={monster.name}
-                //         className="flex items-center justify-between py-2"
-                //       >
-                //         <div className="flex gap-2 w-2/3">
-                //           <input
-                //             type="email"
-                //             name="email"
-                //             id="email"
-                //             className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                //             placeholder="you@example.com"
-                //             value={monster.name}
-                //             onChange={(e) => handleNameChange(e, monster)}
-                //           />
-
-                //           <input
-                //             type="email"
-                //             name="email"
-                //             id="email"
-                //             className="block w-12 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                //             placeholder="you@example.com"
-                //             value={monster.armorClass}
-                //             // onChange={(e) => handleNameChange(e, monster)}
-                //           />
-
-                //           <input
-                //             type="email"
-                //             name="email"
-                //             id="email"
-                //             className="block w-12 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                //             placeholder="you@example.com"
-                //             value={monster.hitPoints}
-                //             // onChange={(e) => handleNameChange(e, monster)}
-                //           />
-                //         </div>
-
-                //         <div className="flex gap-2 w-1/3 justify-end">
-                //           <button
-                //             onClick={() => updateQty(monster, "dec")}
-                //             className="w-9 h-9 text-center rounded-full bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                //           >
-                //             <MinusSmallIcon className="w-4 h-4" />
-                //           </button>
-                //           <input
-                //             type="text"
-                //             // defaultValue={monster.qty}
-                //             value={monster.qty}
-                //             onChange={(e) => handleQtyChange(e, monster)}
-                //             className="w-12 rounded-md border-0 py-1.5 text-gray-900 text-center shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                //           />
-                //           <button
-                //             onClick={() => updateQty(monster, "inc")}
-                //             className="w-9 h-9 text-center rounded-full bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                //           >
-                //             <PlusSmallIcon className="w-4 h-4" />
-                //           </button>
-                //         </div>
-                //       </li>
-                //     ))}
-                //   </ul>
-                // </div>
               )}
 
               {/* Footer */}
@@ -650,7 +575,7 @@ export default function AddMonster({
                   type="button"
                   onClick={() => onAddMonsters(selectedMonsters)}
                   disabled={selectedMonsters.length === 0 ? true : false}
-                  className="w-1/2 inline-flex text-center justify-center capitalize gap-x-1.5 rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-300 transition-colors"
+                  className="w-1/2 inline-flex text-center justify-center capitalize gap-x-1.5 rounded-md bg-green-700 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 ring-1 ring-inset disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:ring-gray-300 transition-colors"
                 >
                   <CheckCircleIcon
                     className="-ml-0.5 h-5 w-5"

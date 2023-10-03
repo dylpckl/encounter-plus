@@ -16,7 +16,7 @@ import { Dialog, Transition, Switch } from "@headlessui/react";
 import MonsterCard from "@/components/combatTracker/MonsterCard";
 import CharacterCard from "@/components/combatTracker/CharacterCard";
 import AddMonster from "@/components/combatTracker/AddMonster";
-import CombatTrackerActionGroup from "@/components/combatTracker/CombatTrackerActionGroup";
+import ActionGroup from "@/components/combatTracker/ActionGroup";
 import TurnButtonGroup from "@/components/combatTracker/TurnButtonGroup";
 import Stopwatch from "@/components/combatTracker/Stopwatch";
 
@@ -827,7 +827,7 @@ export default function CombatTracker({ encounter }) {
 
       // Check if the next turn starts a new round
       if (nextActiveIndex === 0) {
-        setRoundCounter(roundCounter + 1);
+        setRoundCtr(roundCtr + 1);
         // turnCounter = 1
       }
 
@@ -872,6 +872,14 @@ export default function CombatTracker({ encounter }) {
     }
   }
 
+  function handleRestartCombat() {
+    // reset all monster hp, conditions
+  }
+
+  function handleClearInitiative() {
+    // remove all combatants
+  }
+
   return (
     <div className="bg-slate-600 rounded-lg col-span-6 row-span-6 m-5 flex flex-col items-center relative">
       <AddMonster
@@ -884,7 +892,7 @@ export default function CombatTracker({ encounter }) {
 
       <div
         id="header"
-        className="w-full border-b border-slate-300 p-2"
+        className="w-full border-b border-slate-500 p-2"
       >
         <h1 className="text-sm uppercase">combat tracker</h1>
       </div>
@@ -892,7 +900,7 @@ export default function CombatTracker({ encounter }) {
       {/* Actions */}
       <div className="w-full px-4 py-3 border-b border-slate-400">
         <div className="flex items-center justify-between h-12 ">
-          <CombatTrackerActionGroup
+          <ActionGroup
             combatActive={combatActive}
             onSetCombatActive={
               // test
@@ -919,49 +927,38 @@ export default function CombatTracker({ encounter }) {
             }
             onAddMonsters={() => setAddMonstersOpen(true)}
             onAddCharacters={() => setManageCharactersOpen(true)}
-
-            // onRestartCombat={}
-            // onClearInitiative={}
+            onRestartCombat={handleRestartCombat}
+            onClearInitiative={handleClearInitiative}
           />
-          <TurnButtonGroup
+          {/* <TurnButtonGroup
             combatActive={combatActive}
             onNextTurn={() => nextTurn()}
             onPrevTurn={() => prevTurn()}
-          />
+          /> */}
         </div>
-        <div className="flex justify-between">
+        {/* <div className="flex justify-between">
           <ClockIcon
             className="h-5 w-5"
             aria-hidden="true"
           />
-          <span>round</span>
-          {roundCtr}
-          {time}
-          <Stopwatch
-            time={time}
-          />
+          <div className="flex">
+            <span>round</span>
+            {roundCtr}
+            <Stopwatch time={time} />
+          </div>
           <HeartIcon
             className="h-5 w-5"
             aria-hidden="true"
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Body */}
-      <div
-        className="overflow-y-auto overflow-x-hidden h-full w-full p-3"
-        suppressHydrationWarning={true}
-      >
-        <ul
-          className="w-full flex flex-col space-y-2"
-          suppressHydrationWarning={true}
-        >
+      <div className="overflow-y-auto overflow-x-hidden h-full w-full p-3">
+        <ul className="w-full flex flex-col space-y-2">
           {sortedInitiative.map((monster, index) => {
             return (
-              <li
-                key={monster.id}
-                suppressHydrationWarning={true}
-              >
+              <li key={monster.id}>
                 {monster.type === "monster" ? (
                   <MonsterCard
                     ref={
@@ -982,61 +979,34 @@ export default function CombatTracker({ encounter }) {
           })}
         </ul>
       </div>
+
+      {/* Footer */}
+      <div className="flex w-full justify-between border-t border-slate-500 p-2">
+        <button
+          type="button"
+          onClick={prevTurn}
+          className="rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+        >
+          <ChevronUpIcon
+            className="h-4 w-4"
+            aria-hidden="true"
+          />
+        </button>
+        <div className="flex gap-4">
+          <span>round {roundCtr}</span>
+          <Stopwatch time={time} />
+        </div>
+        <button
+          type="button"
+          onClick={nextTurn}
+          className="rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+        >
+          <ChevronDownIcon
+            className="h-4 w-4"
+            aria-hidden="true"
+          />
+        </button>
+      </div>
     </div>
   );
-}
-
-//  {/* Actions */}
-//  <div>
-//  {/* Button Group */}
-//  <span className="isolate inline-flex rounded-md shadow-sm">
-//    <button
-//      type="button"
-//      className="relative inline-flex items-center rounded-l-md bg-white px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
-//    >
-//      <span className="sr-only">Previous</span>
-//      <ChevronDownIcon
-//        className="h-5 w-5"
-//        aria-hidden="true"
-//      />
-//    </button>
-//    <button
-//      type="button"
-//      className="relative -ml-px inline-flex items-center rounded-r-md bg-white px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
-//    >
-//      <span className="sr-only">Next</span>
-//      <ChevronUpIcon
-//        className="h-5 w-5"
-//        aria-hidden="true"
-//      />
-//    </button>
-//  </span>
-// </div>
-
-{
-  /* <CombatSwitch /> */
-}
-// <button onClick={handleSave}>save</button>
-// <button onClick={getData}>get</button>
-{
-  /* <button
-          onClick={() => setManageCharactersOpen(true)}
-          className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-        >
-          <UserGroupIcon
-            className="h-5 w-5"
-            aria-hidden="true"
-          />
-          Characters
-        </button>
-        <button
-          onClick={() => setAddMonstersOpen(true)}
-          className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-        >
-          <UserGroupIcon
-            className="h-5 w-5"
-            aria-hidden="true"
-          />
-          Monsters
-        </button> */
 }

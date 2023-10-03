@@ -1,8 +1,20 @@
 "use client";
 
+// TODO ===================================================
+// handle init change, disallow non-numbers
+// HP
+//    convert to button with standard width
+//    design popover
+// show first 3 active conditions in footer
+// structure: footer
+// turn timer
+// 
+// 
+
 import { useState, forwardRef } from "react";
 import { CONDITIONS } from "@/lib/constants";
 import { Transition } from "@headlessui/react";
+import { ClockIcon, HeartIcon } from "@heroicons/react/24/outline";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -111,16 +123,21 @@ const MonsterCard = forwardRef(
           )}
         >
           <div className="flex w-full gap-4">
-            {/* Init */}
-            <input
-              id="init"
-              onChange={(e) => onInitChange(monster, e)}
-              className="block w-12 h-8 text-center rounded-md border-0 p-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-              type="number"
-              value={monster.init}
-              min="0"
-              step="1"
-            />
+            <div className="flex relative rounded-md shadow-sm">
+              <div className="pointer-events-none absolute h-10 inset-y-0 left-0 flex items-center pl-3">
+                <ClockIcon
+                  className="h-5 w-5 text-gray-400"
+                  aria-hidden="true"
+                />
+              </div>
+              <input
+                id="init"
+                onChange={(e) => onInitChange(monster, e)}
+                className="block w-20 h-10 text-center rounded-md border-0 pl-10 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                type="text"
+                value={monster.init}
+              />
+            </div>
 
             {/* Details */}
             <div className="flex flex-col w-full">
@@ -158,16 +175,25 @@ const MonsterCard = forwardRef(
             {/* HP */}
             <div className="">
               <div className="flex items-center gap-2">
-                <input
-                  id="hp"
-                  className="block w-12 text-center rounded-md border-0 p-1 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                  type="number"
-                  // placeholder={currHP}
-                  // value={currHP}
-                  value={monster.hit_points}
-                  onChange={handleInputChange}
-                  onKeyDown={handleInputKeyDown}
-                />
+                <div className=" flex items-center relative rounded-md shadow-sm">
+                  <div className="pointer-events-none absolute inset-y-0 top-0 left-0 flex items-center pl-3">
+                    <HeartIcon
+                      className="h-5 w-5 text-gray-400"
+                      aria-hidden="true"
+                    />
+                  </div>
+                  <input
+                    id="hp"
+                    className="block w-20 h-10 text-center rounded-md border-0 py-1.5 pl-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    type="text"
+                    // placeholder={currHP}
+                    // value={currHP}
+                    value={monster.hit_points}
+                    onChange={handleInputChange}
+                    onKeyDown={handleInputKeyDown}
+                  />
+                </div>
+
                 {"/"}
                 <span>{monster.maxHP}</span>
               </div>

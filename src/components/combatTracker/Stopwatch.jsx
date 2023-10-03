@@ -1,5 +1,4 @@
-"use client";
-import { useState, useEffect } from "react";
+
 
 const Stopwatch = ({ time }) => {
   //   const hours = Math.floor(time / 360000);
@@ -29,20 +28,6 @@ const Stopwatch = ({ time }) => {
         {seconds.toString().padStart(2, "0")}
         {/* {milliseconds.toString().padStart(2, "0")} */}
       </p>
-      <div className="stopwatch-buttons">
-        {/* <button
-          className="stopwatch-button"
-          onClick={startAndStop}
-        >
-          {isRunning ? "Stop" : "Start"}
-        </button>
-        <button
-          className="stopwatch-button"
-          onClick={reset}
-        >
-          Reset
-        </button> */}
-      </div>
     </div>
   );
 };

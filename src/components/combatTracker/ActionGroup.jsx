@@ -5,16 +5,15 @@ import {
   ArrowPathIcon,
   BugAntIcon,
   MinusCircleIcon,
-  PlayIcon,
-  StopIcon,
   UserPlusIcon,
 } from "@heroicons/react/24/outline";
+import { PlayIcon, StopIcon } from "@heroicons/react/24/solid";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function CombatTrackerActionGroup({
+export default function ActionGroup({
   combatActive,
   onSetCombatActive,
   onAddMonsters,
@@ -23,26 +22,26 @@ export default function CombatTrackerActionGroup({
   onClearInitiative,
 }) {
   const items = [
-    {
-      name: "Add Monsters",
-      onClick: onAddMonsters,
-      icon: (
-        <BugAntIcon
-          className="mr-3 h-5 w-5 group-hover:text-gray-500"
-          aria-hidden="true"
-        />
-      ),
-    },
-    {
-      name: "Add Characters",
-      onClick: onAddCharacters,
-      icon: (
-        <UserPlusIcon
-          className="mr-3 h-5 w-5 group-hover:text-gray-500"
-          aria-hidden="true"
-        />
-      ),
-    },
+    // {
+    //   name: "Add Monsters",
+    //   onClick: onAddMonsters,
+    //   icon: (
+    //     <BugAntIcon
+    //       className="mr-3 h-5 w-5 group-hover:text-gray-500"
+    //       aria-hidden="true"
+    //     />
+    //   ),
+    // },
+    // {
+    //   name: "Add Characters",
+    //   onClick: onAddCharacters,
+    //   icon: (
+    //     <UserPlusIcon
+    //       className="mr-3 h-5 w-5 group-hover:text-gray-500"
+    //       aria-hidden="true"
+    //     />
+    //   ),
+    // },
     {
       name: "Restart",
       onClick: onRestartCombat,
@@ -79,7 +78,7 @@ export default function CombatTrackerActionGroup({
               className="-ml-0.5 h-5 w-5"
               aria-hidden="true"
             />
-            Start Encounter
+            Start Combat
           </>
         ) : (
           <>
@@ -87,7 +86,7 @@ export default function CombatTrackerActionGroup({
               className="-ml-0.5 h-5 w-5"
               aria-hidden="true"
             />
-            Stop Encounter
+            Stop Combat
           </>
         )}
       </button>
