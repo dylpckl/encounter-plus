@@ -16,6 +16,8 @@ import { Dialog, Transition, Switch } from "@headlessui/react";
 import MonsterCard from "@/components/MonsterCard";
 import CharacterCard from "@/components/CharacterCard";
 import AddMonster from "@/components/AddMonster";
+import ButtonWithDropdown from "@/components/ButtonWithDropdown";
+import ButtonGroup from "@/components/ButtonGroup";
 
 // Utils
 import rollInitiative from "@/lib/rollInitiative";
@@ -535,119 +537,6 @@ export default function CombatTracker({ encounter }) {
     );
   };
 
-  // const AddMonster = () => {
-  //   return (
-  //     <Suspense fallback={null}>
-  //       <Transition.Root
-  //         show={addMonstersOpen}
-  //         as={Fragment}
-  //         // appear
-  //       >
-  //         <Dialog
-  //           initialFocus={completeButtonRef}
-  //           as="div"
-  //           className="relative z-10"
-  //           onClose={() => setAddMonstersOpen(false)}
-  //         >
-  //           <Transition.Child
-  //             as={Fragment}
-  //             enter="ease-out duration-300"
-  //             enterFrom="opacity-0"
-  //             enterTo="opacity-100"
-  //             leave="ease-in duration-200"
-  //             leaveFrom="opacity-100"
-  //             leaveTo="opacity-0"
-  //           >
-  //             <div className="fixed inset-0 bg-gray-500 bg-opacity-25 transition-opacity" />
-  //           </Transition.Child>
-
-  //           <div className="fixed inset-0 z-10 w-screen overflow-y-auto p-4 sm:p-6 md:p-20">
-  //             <Transition.Child
-  //               as={Fragment}
-  //               enter="ease-out duration-300"
-  //               enterFrom="opacity-0 scale-95"
-  //               enterTo="opacity-100 scale-100"
-  //               leave="ease-in duration-200"
-  //               leaveFrom="opacity-100 scale-100"
-  //               leaveTo="opacity-0 scale-95"
-  //             >
-  //               <Dialog.Panel className="mx-auto max-w-xl transform rounded-xl bg-white p-6 shadow-2xl ring-1 ring-black ring-opacity-5 transition-all text-gray-900">
-  //                 <div className="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
-  //                   <button
-  //                     type="button"
-  //                     className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-  //                     onClick={() => setAddMonstersOpen(false)}
-  //                   >
-  //                     <span className="sr-only">Close</span>
-  //                     <XMarkIcon
-  //                       className="h-6 w-6"
-  //                       aria-hidden="true"
-  //                     />
-  //                   </button>
-  //                 </div>
-  //                 <Dialog.Title
-  //                   as="h2"
-  //                   className="text-lg font-medium leading-6 text-gray-900"
-  //                 >
-  //                   Add Monsters to encounter name
-  //                 </Dialog.Title>
-  //                 <div className="flex w-full">
-  //                   <MonsterCombobox />
-  //                   <SearchBar
-  //                     query={query}
-  //                     // onChange={setQuery}
-  //                     onChange={handleSearchChange}
-  //                     onClick={clearQuery}
-  //                   />
-  //                   {query.length > 0 && (
-  //                     <SearchResults
-  //                       // monsters={debouncedSearchValue}
-  //                       monsters={monsterResults}
-  //                       onChange={batchMonsters}
-  //                       // onChange={handleAddMonster}
-  //                       // onChange={handleAddActiveMonster}
-  //                     />
-  //                   )}
-  //                   <ul>
-  //                     {monstersToAdd.map((monster, idx) => (
-  //                       <li
-  //                         key={idx}
-  //                         // onChange={handleAddMonster}
-  //                       >
-  //                         {monster.name}
-  //                       </li>
-  //                     ))}
-  //                   </ul>
-
-  //                   {/* <div className="w-1/2 bg-sky-500">
-  //                     <ul>
-  //                       {activeMonsters.map((monster, idx) => (
-  //                         <li key={idx}>{monster.name}</li>
-  //                       ))}
-  //                     </ul>
-  //                   </div> */}
-  //                 </div>
-
-  //                 <div className="mt-4">
-  //                   <button
-  //                     ref={completeButtonRef}
-  //                     type="button"
-  //                     className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-  //                     onClick={addActiveMonsters}
-  //                     // onClick={() => setAddMonstersOpen(false)}
-  //                   >
-  //                     Got it, thanks!
-  //                   </button>
-  //                 </div>
-  //               </Dialog.Panel>
-  //             </Transition.Child>
-  //           </div>
-  //         </Dialog>
-  //       </Transition.Root>
-  //     </Suspense>
-  //   );
-  // };
-
   function batchMonsters(monster) {
     setMonstersToAdd([...monstersToAdd, monster]);
   }
@@ -707,31 +596,6 @@ export default function CombatTracker({ encounter }) {
   //   const data = await res.json();
   //   setMonsterResults(data);
   // };
-
-  // useEffect(() => {
-  //   if (query) {
-  //     fetchMonsters(query);
-  //   } else {
-  //     setMonsterResults([]);
-  //   }
-  // }, [debouncedSearch]);
-
-  function handleSearchChange(e) {
-    setQuery(e.target.value);
-
-    // const debouncedFetchMonsters = debounce(() => fetchMonsters(query), 2000);
-    // if (query) {
-    //   debouncedFetchMonsters();
-    // } else {
-    //   setMonsterResults([]);
-    // }
-  }
-
-  function clearQuery() {
-    // passed to SearchBar to enable clearing the input
-    setQuery("");
-    setMonsterResults([]);
-  }
 
   function handleAddActiveMonster(monster) {
     // add monster to initiative
@@ -982,79 +846,27 @@ export default function CombatTracker({ encounter }) {
   return (
     <div
       className="bg-slate-600 rounded-lg col-span-6 row-span-6 m-5 flex flex-col items-center relative"
-      suppressHydrationWarning={true}
+      // suppressHydrationWarning={true}
     >
-      {/* <AddMonster /> */}
       <AddMonster
         open={addMonstersOpen}
         setOpen={setAddMonstersOpen}
         onAddMonsters={onAddMonsters}
         encounter={encounter}
       />
-      <ManageCharacters />
-      {/* Header */}
+      {/* <ManageCharacters /> */}
+
       <div
         id="header"
-        className="w-full bg-pink-600 border-b border-slate-200 px-3 py-4"
+        className="w-full border-b border-slate-300 p-2"
       >
         <h1 className="text-sm uppercase">combat tracker</h1>
-        {/* <div className="">
-          <button onClick={() => setActiveMonsters([])}>clear</button>
-          <ClockIcon className="h-6 w-6" />
-          <HeartIcon className="h-6 w-6" />
-          <button
-            className="h-6"
-            onClick={() => setAddMonstersOpen(true)}
-          >
-            add monsters
-          </button>
-        </div> */}
-        <CombatSwitch />
-        <button onClick={handleSave}>save</button>
-        <button onClick={getData}>get</button>
-        {/* Button Group */}
-        <span className="isolate inline-flex rounded-md shadow-sm">
-          <button
-            type="button"
-            className="relative inline-flex items-center rounded-l-md bg-white px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
-          >
-            <span className="sr-only">Previous</span>
-            <ChevronDownIcon
-              className="h-5 w-5"
-              aria-hidden="true"
-            />
-          </button>
-          <button
-            type="button"
-            className="relative -ml-px inline-flex items-center rounded-r-md bg-white px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
-          >
-            <span className="sr-only">Next</span>
-            <ChevronUpIcon
-              className="h-5 w-5"
-              aria-hidden="true"
-            />
-          </button>
-        </span>
-        <button
-          onClick={() => setManageCharactersOpen(true)}
-          className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-        >
-          <UserGroupIcon
-            className="h-5 w-5"
-            aria-hidden="true"
-          />
-          Characters
-        </button>
-        <button
-          onClick={() => setAddMonstersOpen(true)}
-          className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-        >
-          <UserGroupIcon
-            className="h-5 w-5"
-            aria-hidden="true"
-          />
-          Monsters
-        </button>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center w-full h-12 bg-sky-300">
+        <ButtonGroup />
+        <ButtonWithDropdown />
       </div>
 
       {/* Body */}
@@ -1094,4 +906,59 @@ export default function CombatTracker({ encounter }) {
       </div>
     </div>
   );
+}
+
+//  {/* Actions */}
+//  <div>
+//  {/* Button Group */}
+//  <span className="isolate inline-flex rounded-md shadow-sm">
+//    <button
+//      type="button"
+//      className="relative inline-flex items-center rounded-l-md bg-white px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+//    >
+//      <span className="sr-only">Previous</span>
+//      <ChevronDownIcon
+//        className="h-5 w-5"
+//        aria-hidden="true"
+//      />
+//    </button>
+//    <button
+//      type="button"
+//      className="relative -ml-px inline-flex items-center rounded-r-md bg-white px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+//    >
+//      <span className="sr-only">Next</span>
+//      <ChevronUpIcon
+//        className="h-5 w-5"
+//        aria-hidden="true"
+//      />
+//    </button>
+//  </span>
+// </div>
+
+{
+  /* <CombatSwitch /> */
+}
+// <button onClick={handleSave}>save</button>
+// <button onClick={getData}>get</button>
+{
+  /* <button
+          onClick={() => setManageCharactersOpen(true)}
+          className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        >
+          <UserGroupIcon
+            className="h-5 w-5"
+            aria-hidden="true"
+          />
+          Characters
+        </button>
+        <button
+          onClick={() => setAddMonstersOpen(true)}
+          className="rounded-md bg-indigo-600 px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        >
+          <UserGroupIcon
+            className="h-5 w-5"
+            aria-hidden="true"
+          />
+          Monsters
+        </button> */
 }
