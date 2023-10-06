@@ -8,6 +8,7 @@ import {
   useRef,
   forwardRef,
   Suspense,
+  useReducer,
 } from "react";
 import { nanoid } from "nanoid";
 import { Dialog, Transition, Switch } from "@headlessui/react";
@@ -19,6 +20,7 @@ import AddMonster from "@/components/combatTracker/AddMonster";
 import ActionGroup from "@/components/combatTracker/ActionGroup";
 import TurnButtonGroup from "@/components/combatTracker/TurnButtonGroup";
 import Stopwatch from "@/components/combatTracker/Stopwatch";
+import Setup from "@/components/combatTracker/Setup";
 
 // Utils
 import rollInitiative from "@/lib/rollInitiative";
@@ -30,10 +32,17 @@ import {
   HeartIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   PlayIcon,
   XMarkIcon,
   UserGroupIcon,
+  ArrowPathIcon,
+  BackwardIcon,
+  ForwardIcon,
 } from "@heroicons/react/24/outline";
+
+import { Play, Pause, SkipBack, SkipForward } from "lucide-react";
 
 function debounce(func, delay) {
   let timerId;
@@ -66,7 +75,34 @@ const CHARACTERS = [
   },
 ];
 
+// const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
+// const updatedMonsters = [...activeMonsters];
+// updatedMonsters[monsterIndex] = { ...monster, init: e.target.value };
+// setActiveMonsters(updatedMonsters);
+
+// function monsterReducer(monsters, action) {
+//   switch (action.type) {
+//     case "updateInit": {
+//       return monsters.map((m) => {
+//         if (m.id === action.monster.id) {
+//           return action.monster;
+//         } else {
+//           return m;
+//         }
+//       });
+//     }
+//     case "deleted": {
+//       return monsters.filter((m) => m.id !== action.id);
+//     }
+
+//     default: {
+//       throw Error("unknown action: " + action.type);
+//     }
+//   }
+// }
+
 export default function CombatTracker({ encounter }) {
+  // const [activeMonsters, dispatch] = useReducer(monsterReducer, []);
   const [query, setQuery] = useState("");
   const [manageCharactersOpen, setManageCharactersOpen] = useState(false);
   const [characters, setCharacters] = useState([]);
@@ -731,6 +767,7 @@ export default function CombatTracker({ encounter }) {
       );
       setActiveMonsters(updatedMonsters);
     }
+    // dispatch({ type: "deleted", id: monster.id });
   }
 
   function handleMonsterCondition(monster, condition) {
@@ -857,10 +894,12 @@ export default function CombatTracker({ encounter }) {
   }
 
   function handleMonsterInitChange(monster, e) {
-    const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
-    const updatedMonsters = [...activeMonsters];
-    updatedMonsters[monsterIndex] = { ...monster, init: e.target.value };
-    setActiveMonsters(updatedMonsters);
+    // const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
+    // const updatedMonsters = [...activeMonsters];
+    // updatedMonsters[monsterIndex] = { ...monster, init: e.target.value };
+    // setActiveMonsters(updatedMonsters);
+
+    dispatch({ type: "updateInit", monster: monster });
   }
 
   function handleMonsterUpdate(monster, keyToUpdate, newValue) {
@@ -870,6 +909,8 @@ export default function CombatTracker({ encounter }) {
       updatedMonsters[monsterIndex] = { ...monster, [keyToUpdate]: newValue };
       setActiveMonsters(updatedMonsters);
     }
+
+    // dispatch({type:'update'})
   }
 
   function handleRestartCombat() {
@@ -892,66 +933,75 @@ export default function CombatTracker({ encounter }) {
 
       <div
         id="header"
-        className="w-full border-b border-slate-500 p-2"
+        className="w-full flex justify-between items-center border-b border-slate-500 p-3"
       >
         <h1 className="text-sm uppercase">combat tracker</h1>
+        <div className="flex gap-4">
+          <span>round {roundCtr}</span>
+          <Stopwatch time={time} />
+        </div>
+        <Setup
+          onAddMonsters={() => setAddMonstersOpen(true)}
+          // onaddCharacter={handleAddCharacter}
+          onClearInitiative={handleClearInitiative}
+        />
       </div>
 
       {/* Actions */}
-      <div className="w-full px-4 py-3 border-b border-slate-400">
+      {/* <div className="w-full px-4 py-3 border-b border-slate-400">
         <div className="flex items-center justify-between h-12 ">
-          <ActionGroup
-            combatActive={combatActive}
-            onSetCombatActive={
-              // test
-              () => {
-                // setCombatActive(!combatActive);
-                setCombatActive((prevCombatActive) => {
-                  const newCombatActive = !prevCombatActive;
-                  if (newCombatActive) {
-                    startCombat();
-                  } else {
-                    stopCombat();
-                  }
-                  return newCombatActive;
-                });
-              }
-              // combatActive === true ? startCombat() : stopCombat();
-              // });
-              // setCombatActive((prev) => {
-              //   // if combatActive, stopCombat, otherwise startCombat
-              //   prev ? stopCombat() : startCombat();
-              //   // console.log(activeMonsterIndex);
-              //   return !prev;
-              // });
-            }
-            onAddMonsters={() => setAddMonstersOpen(true)}
-            onAddCharacters={() => setManageCharactersOpen(true)}
-            onRestartCombat={handleRestartCombat}
-            onClearInitiative={handleClearInitiative}
-          />
-          {/* <TurnButtonGroup
-            combatActive={combatActive}
-            onNextTurn={() => nextTurn()}
-            onPrevTurn={() => prevTurn()}
-          /> */}
+          <button
+            type="button"
+            className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            <PlayIcon
+              className="-ml-0.5 h-5 w-5"
+              aria-hidden="true"
+            />
+            Play Combat
+          </button>
+
+          <span className="isolate inline-flex rounded-md shadow-sm">
+            <button
+              type="button"
+              className="relative inline-flex items-center rounded-l-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+            >
+              <ArrowPathIcon
+                className="h-5 w-5"
+                aria-hidden="true"
+              />
+              <kbd className="ml-2 flex h-5 w-5 items-center justify-center rounded border bg-gray-50 text-xs font-mono">
+                R
+              </kbd>
+            </button>
+            <button
+              type="button"
+              className="relative -ml-px inline-flex items-center bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+            >
+              <BackwardIcon
+                className="h-5 w-5"
+                aria-hidden="true"
+              />
+              <kbd className="ml-2 flex h-5 w-5 items-center justify-center rounded border bg-gray-50 text-xs font-mono">
+                B
+              </kbd>
+            </button>
+            <button
+              type="button"
+              className="relative -ml-px inline-flex items-center rounded-r-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+            >
+              <ForwardIcon
+                className="h-5 w-5"
+                aria-hidden="true"
+              />
+              <kbd className="ml-2 flex h-5 w-5 items-center justify-center rounded border bg-gray-50 text-xs font-mono">
+                F
+              </kbd>
+            </button>
+          </span>
         </div>
-        {/* <div className="flex justify-between">
-          <ClockIcon
-            className="h-5 w-5"
-            aria-hidden="true"
-          />
-          <div className="flex">
-            <span>round</span>
-            {roundCtr}
-            <Stopwatch time={time} />
-          </div>
-          <HeartIcon
-            className="h-5 w-5"
-            aria-hidden="true"
-          />
-        </div> */}
-      </div>
+     
+      </div> */}
 
       {/* Body */}
       <div className="overflow-y-auto overflow-x-hidden h-full w-full p-3">
@@ -961,9 +1011,9 @@ export default function CombatTracker({ encounter }) {
               <li key={monster.id}>
                 {monster.type === "monster" ? (
                   <MonsterCard
-                    ref={
-                      index === activeMonsterIndex ? activeMonsterCardRef : null
-                    }
+                    // ref={
+                    //   index === activeMonsterIndex ? activeMonsterCardRef : null
+                    // }
                     monster={monster}
                     onKill={handleKill}
                     onDelete={handleDeleteMonster}
@@ -981,31 +1031,65 @@ export default function CombatTracker({ encounter }) {
       </div>
 
       {/* Footer */}
-      <div className="flex w-full justify-between border-t border-slate-500 p-2">
-        <button
-          type="button"
-          onClick={prevTurn}
-          className="rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-        >
-          <ChevronUpIcon
-            className="h-4 w-4"
-            aria-hidden="true"
-          />
-        </button>
-        <div className="flex gap-4">
-          <span>round {roundCtr}</span>
-          <Stopwatch time={time} />
-        </div>
-        <button
-          type="button"
-          onClick={nextTurn}
-          className="rounded bg-white px-2 py-1 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-        >
-          <ChevronDownIcon
-            className="h-4 w-4"
-            aria-hidden="true"
-          />
-        </button>
+      <div className="flex w-full place-content-end border-t border-slate-500 p-4">
+        <span className="isolate inline-flex rounded-md shadow-sm">
+          <button
+            type="button"
+            className="relative inline-flex items-center rounded-l-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+          >
+            {/* <ArrowPathIcon
+                className="h-5 w-5"
+                aria-hidden="true"
+              /> */}
+            <kbd className="mr-2 flex h-5 w-5 items-center justify-center rounded border bg-gray-50 text-xs font-mono">
+              B
+            </kbd>
+            <SkipBack
+              size={20}
+              className="text-gray-600"
+            />
+          </button>
+          <button
+            type="button"
+            onClick={() => setCombatActive(!combatActive)}
+            className="relative -ml-px inline-flex items-center bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+          >
+            {/* <PlayIcon
+                className="h-5 w-5"
+                aria-hidden="true"
+              /> */}
+            <kbd className="mr-2 flex h-5 w-5 items-center justify-center rounded border bg-gray-50 text-xs font-mono">
+              P
+            </kbd>
+            {combatActive ? (
+              <Pause
+                size={20}
+                className="text-gray-600"
+              />
+            ) : (
+              <Play
+                size={20}
+                className="text-gray-600"
+              />
+            )}
+          </button>
+          <button
+            type="button"
+            className="relative -ml-px inline-flex items-center rounded-r-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+          >
+            {/* <ForwardIcon
+                className="h-5 w-5"
+                aria-hidden="true"
+              /> */}
+            <kbd className="mr-2 flex h-5 w-5 items-center justify-center rounded border bg-gray-50 text-xs font-mono">
+              F
+            </kbd>
+            <SkipForward
+              size={20}
+              className="text-gray-600"
+            />
+          </button>
+        </span>
       </div>
     </div>
   );

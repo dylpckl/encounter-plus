@@ -14,8 +14,6 @@ import {
   TagIcon,
 } from "@heroicons/react/24/outline";
 
-// Components
-import CombatTracker from "@/components/CombatTracker";
 
 const projects = [
   { id: 1, name: "Workflow Inc. / Website Redesign", url: "#" },
