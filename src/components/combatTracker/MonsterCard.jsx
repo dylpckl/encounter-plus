@@ -11,12 +11,13 @@
 //
 //
 
-import { useState, useEffect, forwardRef } from "react";
+import { useState, useEffect, forwardRef, useRef } from "react";
 import { CONDITIONS } from "@/lib/constants";
 import { Transition } from "@headlessui/react";
 import { ClockIcon, HeartIcon } from "@heroicons/react/24/outline";
 
 import useDebounce from "@/lib/hooks/useDebounce";
+import useOnClickOutside from "@/lib/hooks/useOnClickOutside";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -46,8 +47,15 @@ const MonsterCard = forwardRef(
     const [inputValue, setInputValue] = useState(monster.init);
     const [conditionsOpen, setConditionsOpen] = useState(false);
 
+    const popoverRef = useRef(null);
+
+    const [popoverOpen, setPopoverOpen] = useState(false);
+
     const [newInit, setNewInit] = useState(monster.init);
+
     const debouncedInit = useDebounce(newInit);
+
+    useOnClickOutside(popoverRef, () => setPopoverOpen(false));
 
     const ConditionsButton = () => {
       const numberOfActiveConditions = Object.values(monster.conditions).reduce(
@@ -121,7 +129,6 @@ const MonsterCard = forwardRef(
     };
 
     useEffect(() => {
-      // Call onInitChange when debouncedInit changes
       onInitChange(monster, debouncedInit);
     }, [debouncedInit]);
 
@@ -130,13 +137,20 @@ const MonsterCard = forwardRef(
     }
 
     return (
-      // <div className="backdrop-blur-md bg-slate-800 rounded-lg p-4 flex items-center justify-between gap-2">
       <>
+        {popoverOpen && (
+          <div
+            ref={popoverRef}
+            className="absolute w-12 h-12 -right-20 z-50 bg-sky-300"
+          >
+            aaaaaaaaa
+          </div>
+        )}
         <div
           ref={ref}
           className={classNames(
             monster.active ? "bg-red-300" : "bg-slate-500",
-            "static backdrop-blur-md rounded-lg p-3 flex flex-col items-center justify-between"
+            "relative backdrop-blur-md rounded-lg p-3 flex flex-col items-center justify-between"
           )}
         >
           <div className="flex w-full gap-4">
@@ -213,6 +227,7 @@ const MonsterCard = forwardRef(
                   </div>
                   <input
                     id="hp"
+                    onClick={() => setPopoverOpen(true)}
                     className="block w-20 h-10 text-center rounded-md border-0 py-1.5 pl-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     type="text"
                     // placeholder={currHP}

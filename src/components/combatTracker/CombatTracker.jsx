@@ -103,6 +103,7 @@ const CHARACTERS = [
 
 export default function CombatTracker({ encounter }) {
   // const [activeMonsters, dispatch] = useReducer(monsterReducer, []);
+  const monsterCardRef = useRef(null);
   const [query, setQuery] = useState("");
   const [manageCharactersOpen, setManageCharactersOpen] = useState(false);
   const [characters, setCharacters] = useState([]);
@@ -822,7 +823,6 @@ export default function CombatTracker({ encounter }) {
     setIsRunning(true);
     // setActiveMonsterIndex(0); // Set the active monster index to 0
 
-
     // if this is the first time combat is active, set the first monster as active
     // if (activeMonsterIndex === -1) {
     //   setActiveMonsterIndex(0);
@@ -833,10 +833,6 @@ export default function CombatTracker({ encounter }) {
     // } else {
     //   setActiveMonsters((prev) => [
     //     ...prev,
-
-      
-
-
   }
 
   function stopCombat() {
@@ -948,6 +944,7 @@ export default function CombatTracker({ encounter }) {
   }
   return (
     <div className="bg-slate-600 rounded-lg col-span-6 row-span-6 m-5 flex flex-col items-center relative">
+      
       <AddMonster
         open={addMonstersOpen}
         setOpen={setAddMonstersOpen}
@@ -972,65 +969,9 @@ export default function CombatTracker({ encounter }) {
         />
       </div>
 
-      {/* Actions */}
-      {/* <div className="w-full px-4 py-3 border-b border-slate-400">
-        <div className="flex items-center justify-between h-12 ">
-          <button
-            type="button"
-            className="inline-flex items-center gap-x-1.5 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-          >
-            <PlayIcon
-              className="-ml-0.5 h-5 w-5"
-              aria-hidden="true"
-            />
-            Play Combat
-          </button>
-
-          <span className="isolate inline-flex rounded-md shadow-sm">
-            <button
-              type="button"
-              className="relative inline-flex items-center rounded-l-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
-            >
-              <ArrowPathIcon
-                className="h-5 w-5"
-                aria-hidden="true"
-              />
-              <kbd className="ml-2 flex h-5 w-5 items-center justify-center rounded border bg-gray-50 text-xs font-mono">
-                R
-              </kbd>
-            </button>
-            <button
-              type="button"
-              className="relative -ml-px inline-flex items-center bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
-            >
-              <BackwardIcon
-                className="h-5 w-5"
-                aria-hidden="true"
-              />
-              <kbd className="ml-2 flex h-5 w-5 items-center justify-center rounded border bg-gray-50 text-xs font-mono">
-                B
-              </kbd>
-            </button>
-            <button
-              type="button"
-              className="relative -ml-px inline-flex items-center rounded-r-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
-            >
-              <ForwardIcon
-                className="h-5 w-5"
-                aria-hidden="true"
-              />
-              <kbd className="ml-2 flex h-5 w-5 items-center justify-center rounded border bg-gray-50 text-xs font-mono">
-                F
-              </kbd>
-            </button>
-          </span>
-        </div>
-     
-      </div> */}
-
       {/* Body */}
-      <div className="overflow-y-auto overflow-x-hidden h-full w-full p-3">
-        <ul className="w-full flex flex-col space-y-2">
+      <div className="overflow-y-auto h-full w-full p-3">
+        <ul className="w-full flex overflow-hidden flex-col space-y-2">
           {sortedInitiative.map((monster, index) => {
             return (
               <li key={monster.id}>
@@ -1039,6 +980,7 @@ export default function CombatTracker({ encounter }) {
                     // ref={
                     //   index === activeMonsterIndex ? activeMonsterCardRef : null
                     // }
+                    ref={monsterCardRef}
                     monster={monster}
                     onKill={handleKill}
                     onDelete={handleDeleteMonster}
