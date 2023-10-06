@@ -8,13 +8,15 @@
 // show first 3 active conditions in footer
 // structure: footer
 // turn timer
-// 
-// 
+//
+//
 
-import { useState, forwardRef } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { CONDITIONS } from "@/lib/constants";
 import { Transition } from "@headlessui/react";
 import { ClockIcon, HeartIcon } from "@heroicons/react/24/outline";
+
+import useDebounce from "@/lib/hooks/useDebounce";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -41,28 +43,11 @@ const MonsterCard = forwardRef(
     ref
   ) => {
     const [currHP, setCurrHP] = useState(monster.hit_points);
-    const [inputValue, setInputValue] = useState(0);
+    const [inputValue, setInputValue] = useState(monster.init);
     const [conditionsOpen, setConditionsOpen] = useState(false);
 
-    const handleInputChange = (event) => {
-      setInputValue(event.target.value);
-    };
-
-    const handleInputKeyDown = (event) => {
-      if (event.key === "Enter") {
-        const parsedValue = parseInt(inputValue, 10);
-
-        if (!isNaN(parsedValue)) {
-          setCurrHP(parsedValue);
-        }
-      } else if (event.key === "-") {
-        setInputValue("-" + inputValue);
-        event.preventDefault(); // Prevent the "-" character from being typed in the input
-      } else if (event.key === "+") {
-        setInputValue("+" + inputValue);
-        event.preventDefault(); // Prevent the "+" character from being typed in the input
-      }
-    };
+    const [newInit, setNewInit] = useState(monster.init);
+    const debouncedInit = useDebounce(newInit);
 
     const ConditionsButton = () => {
       const numberOfActiveConditions = Object.values(monster.conditions).reduce(
@@ -112,6 +97,38 @@ const MonsterCard = forwardRef(
       );
     };
 
+    const handleInputChange = (event) => {
+      // Allow only numbers
+      const value = event.target.value.replace(/[^0-9]/g, "");
+      setInputValue(value);
+    };
+
+    const handleInputKeyDown = (event) => {
+      // Allow only numbers and specific keys
+      if (
+        !(
+          event.key === "Enter" ||
+          event.key === "Backspace" ||
+          event.key === "ArrowLeft" ||
+          event.key === "ArrowRight" ||
+          event.key === "Tab"
+        )
+      ) {
+        if (isNaN(parseInt(event.key, 10))) {
+          event.preventDefault();
+        }
+      }
+    };
+
+    useEffect(() => {
+      // Call onInitChange when debouncedInit changes
+      onInitChange(monster, debouncedInit);
+    }, [debouncedInit]);
+
+    function handleInitChange(monster, e) {
+      setNewInit(parseInt(e.target.value, 10));
+    }
+
     return (
       // <div className="backdrop-blur-md bg-slate-800 rounded-lg p-4 flex items-center justify-between gap-2">
       <>
@@ -131,11 +148,23 @@ const MonsterCard = forwardRef(
                 />
               </div>
               <input
+                // id="init"
+                // // onChange={(e) => onInitChange(monster, e)}
+                // onChange={(e) => handleInitChange(monster, e)}
+                // onClick={(e) => e.target.select()}
+                // className="block w-20 h-10 text-center rounded-md border-0 pl-10 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                // type="text"
+                // value={monster.init}
                 id="init"
-                onChange={(e) => onInitChange(monster, e)}
+                onChange={(e) => {
+                  handleInputChange(e);
+                  handleInitChange(monster, e);
+                }}
+                onFocus={(e) => e.target.select()}
+                onKeyDown={handleInputKeyDown}
                 className="block w-20 h-10 text-center rounded-md border-0 pl-10 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 type="text"
-                value={monster.init}
+                value={inputValue}
               />
             </div>
 

@@ -821,18 +821,34 @@ export default function CombatTracker({ encounter }) {
     setTime(1);
     setIsRunning(true);
     // setActiveMonsterIndex(0); // Set the active monster index to 0
+
+
+    // if this is the first time combat is active, set the first monster as active
+    // if (activeMonsterIndex === -1) {
+    //   setActiveMonsterIndex(0);
+    //   setActiveMonsters((prev) => [
+    //     ...prev,
+    //     { ...prev[0], active: true },  // set the first monster as active
+    //   ]);
+    // } else {
+    //   setActiveMonsters((prev) => [
+    //     ...prev,
+
+      
+
+
   }
 
   function stopCombat() {
-    console.log("combat stopping");
-    const updatedMonsters = activeMonsters.map((monster) => ({
-      ...monster,
-      active: false,
-    }));
+    console.log("combat paused");
+    // const updatedMonsters = activeMonsters.map((monster) => ({
+    //   ...monster,
+    //   active: false,
+    // }));
 
-    setActiveMonsters(updatedMonsters);
+    // setActiveMonsters(updatedMonsters);
     setCombatActive(false);
-    setTime(0);
+    // setTime(0);
     setIsRunning(false);
     // Optionally, you can reset the active monster index to -1 or another value.
     // setActiveMonsterIndex(-1);
@@ -893,13 +909,13 @@ export default function CombatTracker({ encounter }) {
     }
   }
 
-  function handleMonsterInitChange(monster, e) {
-    // const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
-    // const updatedMonsters = [...activeMonsters];
-    // updatedMonsters[monsterIndex] = { ...monster, init: e.target.value };
-    // setActiveMonsters(updatedMonsters);
+  function handleMonsterInitChange(monster, newInit) {
+    const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
+    const updatedMonsters = [...activeMonsters];
+    updatedMonsters[monsterIndex] = { ...monster, init: newInit };
+    setActiveMonsters(updatedMonsters);
 
-    dispatch({ type: "updateInit", monster: monster });
+    // dispatch({ type: "updateInit", monster: monster });
   }
 
   function handleMonsterUpdate(monster, keyToUpdate, newValue) {
@@ -921,6 +937,15 @@ export default function CombatTracker({ encounter }) {
     // remove all combatants
   }
 
+  function handlePlayPause() {
+    // if combatActive is true, set it to false and call stopCombat()
+    // if combatActive is false, set it to true and call startCombat()
+    if (combatActive) {
+      stopCombat();
+    } else {
+      startCombat();
+    }
+  }
   return (
     <div className="bg-slate-600 rounded-lg col-span-6 row-span-6 m-5 flex flex-col items-center relative">
       <AddMonster
@@ -1035,6 +1060,7 @@ export default function CombatTracker({ encounter }) {
         <span className="isolate inline-flex rounded-md shadow-sm">
           <button
             type="button"
+            onClick={prevTurn}
             className="relative inline-flex items-center rounded-l-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
           >
             {/* <ArrowPathIcon
@@ -1051,7 +1077,7 @@ export default function CombatTracker({ encounter }) {
           </button>
           <button
             type="button"
-            onClick={() => setCombatActive(!combatActive)}
+            onClick={handlePlayPause}
             className="relative -ml-px inline-flex items-center bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
           >
             {/* <PlayIcon
@@ -1075,6 +1101,7 @@ export default function CombatTracker({ encounter }) {
           </button>
           <button
             type="button"
+            onClick={nextTurn}
             className="relative -ml-px inline-flex items-center rounded-r-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
           >
             {/* <ForwardIcon
