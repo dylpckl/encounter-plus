@@ -11,10 +11,12 @@
 //
 //
 
-import { useState, useEffect, forwardRef, useRef } from "react";
+import { useState, useEffect, forwardRef, useRef, Fragment } from "react";
 import { CONDITIONS } from "@/lib/constants";
 import { Transition } from "@headlessui/react";
 import { ClockIcon, HeartIcon } from "@heroicons/react/24/outline";
+
+import { Popover } from "@headlessui/react";
 
 import useDebounce from "@/lib/hooks/useDebounce";
 import useOnClickOutside from "@/lib/hooks/useOnClickOutside";
@@ -139,13 +141,26 @@ const MonsterCard = forwardRef(
     return (
       <>
         {popoverOpen && (
-          <div
-            ref={popoverRef}
-            className="absolute w-12 h-12 -right-20 z-50 bg-sky-300"
+          <Transition
+            as={Fragment}
+            show={popoverOpen}
+            appear
+            enter="transition duration-100 ease-out"
+            enterFrom="transform scale-95 opacity-0"
+            enterTo="transform scale-100 opacity-100"
+            leave="transition duration-75 ease-out"
+            leaveFrom="transform scale-100 opacity-100"
+            leaveTo="transform scale-95 opacity-0"
           >
-            aaaaaaaaa
-          </div>
+            <div
+              ref={popoverRef}
+              className="absolute w-12 h-12 -right-20 z-50 bg-sky-300"
+            >
+              aaaaaaaaa
+            </div>
+          </Transition>
         )}
+
         <div
           ref={ref}
           className={classNames(
@@ -153,6 +168,26 @@ const MonsterCard = forwardRef(
             "relative backdrop-blur-md rounded-lg p-3 flex flex-col items-center justify-between"
           )}
         >
+          {/* <Popover className="relative">
+            <Popover.Button>Solutions</Popover.Button>
+            <Transition
+              enter="transition duration-100 ease-out"
+              enterFrom="transform scale-95 opacity-0"
+              enterTo="transform scale-100 opacity-100"
+              leave="transition duration-75 ease-out"
+              leaveFrom="transform scale-100 opacity-100"
+              leaveTo="transform scale-95 opacity-0"
+            >
+              <Popover.Panel className="bg-white text-black absolute z-50">
+                <div className="grid grid-cols-2">
+                  <a href="/analytics">Analytics</a>
+                  <a href="/engagement">Engagement</a>
+                  <a href="/security">Security</a>
+                  <a href="/integrations">Integrations</a>
+                </div>
+              </Popover.Panel>
+            </Transition>
+          </Popover> */}
           <div className="flex w-full gap-4">
             <div className="flex relative rounded-md shadow-sm">
               <div className="pointer-events-none absolute h-10 inset-y-0 left-0 flex items-center pl-3">

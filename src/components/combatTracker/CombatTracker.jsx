@@ -12,6 +12,7 @@ import {
 } from "react";
 import { nanoid } from "nanoid";
 import { Dialog, Transition, Switch } from "@headlessui/react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 // Components
 import MonsterCard from "@/components/combatTracker/MonsterCard";
@@ -102,6 +103,7 @@ const CHARACTERS = [
 // }
 
 export default function CombatTracker({ encounter }) {
+  const [parent, enableAnimations] = useAutoAnimate();
   // const [activeMonsters, dispatch] = useReducer(monsterReducer, []);
   const monsterCardRef = useRef(null);
   const [query, setQuery] = useState("");
@@ -944,7 +946,6 @@ export default function CombatTracker({ encounter }) {
   }
   return (
     <div className="bg-slate-600 rounded-lg col-span-6 row-span-6 m-5 flex flex-col items-center relative">
-      
       <AddMonster
         open={addMonstersOpen}
         setOpen={setAddMonstersOpen}
@@ -971,7 +972,10 @@ export default function CombatTracker({ encounter }) {
 
       {/* Body */}
       <div className="overflow-y-auto h-full w-full p-3">
-        <ul className="w-full flex overflow-hidden flex-col space-y-2">
+        <ul
+          ref={parent}
+          className="w-full flex overflow-hidden flex-col space-y-2"
+        >
           {sortedInitiative.map((monster, index) => {
             return (
               <li key={monster.id}>
