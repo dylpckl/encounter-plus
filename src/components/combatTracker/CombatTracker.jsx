@@ -23,6 +23,7 @@ import ActionGroup from "@/components/combatTracker/ActionGroup";
 import TurnButtonGroup from "@/components/combatTracker/TurnButtonGroup";
 import Stopwatch from "@/components/combatTracker/Stopwatch";
 import Setup from "@/components/combatTracker/Setup";
+import { Button } from "../Button";
 
 // Utils
 import rollInitiative from "@/lib/rollInitiative";
@@ -37,6 +38,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   PlayIcon,
+  PlusIcon,
   XMarkIcon,
   UserGroupIcon,
   ArrowPathIcon,
@@ -774,6 +776,60 @@ export default function CombatTracker({ encounter }) {
       setActiveMonsters(updatedMonsters);
     }
     // dispatch({ type: "deleted", id: monster.id });
+
+    // toast.success(`${monster.name} deleted`);
+    // toast((t) => (
+    //   <span>
+    //     Custom and <b>bold</b>
+    //     <button onClick={() => toast.dismiss(t.id)}>Dismiss</button>
+    //   </span>
+    // ));
+    toast.custom((t) => (
+      <div
+        aria-live="assertive"
+        className="pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6"
+      >
+        <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
+          <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+            <div className="p-4">
+              <div className="flex items-center">
+                <div className="flex w-0 flex-1 justify-between">
+                  <p className="w-0 flex-1 text-sm font-medium text-gray-900">
+                    {monster.name} removed from combat
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => undoDeleteMonster(monster, t.id)}
+                    className="ml-3 flex-shrink-0 rounded-md bg-white text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  >
+                    Undo
+                  </button>
+                </div>
+                <div className="ml-4 flex flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => toast.remove(t.id)}
+                    className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  >
+                    <span className="sr-only">Close</span>
+                    <XMarkIcon
+                      className="h-5 w-5"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    ));
+  }
+
+  function undoDeleteMonster(monster, toastId) {
+    // add monster back to activeMonsters
+    setActiveMonsters((prev) => [...prev, monster]);
+    toast.remove(toastId);
   }
 
   function handleMonsterCondition(monster, condition) {
@@ -974,7 +1030,7 @@ export default function CombatTracker({ encounter }) {
       </div>
 
       {/* Body */}
-      <div className="overflow-y-auto h-full w-full p-3">
+      <div className=" overflow-y-auto h-full w-full p-3">
         <ul
           ref={parent}
           className="w-full flex overflow-hidden flex-col space-y-2"
@@ -1002,6 +1058,98 @@ export default function CombatTracker({ encounter }) {
             );
           })}
         </ul>
+
+        {/* Empty State */}
+        {sortedInitiative.length === 0 && (
+          <div className=" flex flex-col justify-center text-center h-full my-auto">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              className="mx-auto h-12 w-12 text-gray-400"
+            >
+              <polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5" />
+              <line
+                x1="13"
+                x2="19"
+                y1="19"
+                y2="13"
+              />
+              <line
+                x1="16"
+                x2="20"
+                y1="16"
+                y2="20"
+              />
+              <line
+                x1="19"
+                x2="21"
+                y1="21"
+                y2="19"
+              />
+              <polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5" />
+              <line
+                x1="5"
+                x2="9"
+                y1="14"
+                y2="18"
+              />
+              <line
+                x1="7"
+                x2="4"
+                y1="17"
+                y2="20"
+              />
+              <line
+                x1="3"
+                x2="5"
+                y1="19"
+                y2="21"
+              />
+            </svg>
+
+            <h3 className="mt-2 text-sm font-semibold text-gray-900">
+              No combatants
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Get started by creating a new project.
+            </p>
+            <div className="mt-6">
+              <button
+                type="button"
+                className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
+                <PlusIcon
+                  className="-ml-0.5 mr-1.5 h-5 w-5"
+                  aria-hidden="true"
+                />
+                Add Monsters
+              </button>
+              <button
+                type="button"
+                className="ml-6 inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
+                <PlusIcon
+                  className="-ml-0.5 mr-1.5 h-5 w-5"
+                  aria-hidden="true"
+                />
+                Add Characters
+              </button>
+              <Button
+                size="default"
+                variant="sublte"
+              >
+                some ext
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Footer */}
