@@ -19,8 +19,6 @@ import toast from "react-hot-toast";
 import MonsterCard from "@/components/combatTracker/MonsterCard";
 import CharacterCard from "@/components/combatTracker/CharacterCard";
 import AddMonster from "@/components/combatTracker/AddMonster";
-import ActionGroup from "@/components/combatTracker/ActionGroup";
-import TurnButtonGroup from "@/components/combatTracker/TurnButtonGroup";
 import Stopwatch from "@/components/combatTracker/Stopwatch";
 import Setup from "@/components/combatTracker/Setup";
 import { Button } from "../Button";
@@ -45,22 +43,7 @@ import {
   BackwardIcon,
   ForwardIcon,
 } from "@heroicons/react/24/outline";
-
 import { Play, Pause, SkipBack, SkipForward } from "lucide-react";
-
-function debounce(func, delay) {
-  let timerId;
-
-  return function (...args) {
-    const context = this;
-
-    clearTimeout(timerId);
-
-    timerId = setTimeout(() => {
-      func.apply(context, args);
-    }, delay);
-  };
-}
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -79,37 +62,27 @@ const CHARACTERS = [
   },
 ];
 
-// const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
-// const updatedMonsters = [...activeMonsters];
-// updatedMonsters[monsterIndex] = { ...monster, init: e.target.value };
-// setActiveMonsters(updatedMonsters);
+function combatantReducer(combatants, action) {
+  switch (action.type) {
+    case "added_combatants":
+      console.log(action.newCombatants);
+      return [...combatants, ...action.newCombatants];
+    case "deleted_combatant":
+      return combatants.filter((c) => c.id !== action.id);
+    case "updated_combatant":
 
-// function monsterReducer(monsters, action) {
-//   switch (action.type) {
-//     case "updateInit": {
-//       return monsters.map((m) => {
-//         if (m.id === action.monster.id) {
-//           return action.monster;
-//         } else {
-//           return m;
-//         }
-//       });
-//     }
-//     case "deleted": {
-//       return monsters.filter((m) => m.id !== action.id);
-//     }
-
-//     default: {
-//       throw Error("unknown action: " + action.type);
-//     }
-//   }
-// }
+    default: {
+      throw Error("unknown action: " + action.type);
+    }
+  }
+}
 
 export default function CombatTracker({ encounter }) {
+  const [combatants, dispatch] = useReducer(combatantReducer, []);
+  console.log(combatants);
   const [parent, enableAnimations] = useAutoAnimate();
-  // const [activeMonsters, dispatch] = useReducer(monsterReducer, []);
-  const monsterCardRef = useRef(null);
-  const [query, setQuery] = useState("");
+
+  // const [query, setQuery] = useState("");
   const [manageCharactersOpen, setManageCharactersOpen] = useState(false);
   const [characters, setCharacters] = useState([]);
   // const [characters, setCharacters] = useState(() => {
@@ -184,23 +157,36 @@ export default function CombatTracker({ encounter }) {
   //     : false;
   // });
 
-  const [showHPPopover, setShowHPPopover] = useState(false);
-  const [monsterResults, setMonsterResults] = useState([]);
-  const [monstersToAdd, setMonstersToAdd] = useState([]);
   const [addMonstersOpen, setAddMonstersOpen] = useState(false);
 
   // const sortedMonsters = activeMonsters.sort((a, b) => b.init - a.init);
-  const initiative =
-    activeMonsters && activeMonsters.length > 0
-      ? [...activeMonsters, ...characters]
-      : [];
-  const sortedInitiative = initiative.sort((a, b) => b.init - a.init);
+  // const initiative =
+  //   activeMonsters && activeMonsters.length > 0
+  //     ? [...activeMonsters, ...characters]
+  //     : [];
+  // const sortedInitiative = initiative.sort((a, b) => b.init - a.init);
 
-  const debouncedSearch = useDebounce(query);
-  const activeMonsterCardRef = useRef(null);
+  const sortedCombatants = combatants.sort((a, b) => b.init - a.init);
+
+
+  // SIDE EFFECTS ------------------------------------------------------
+  // 
+  // ---------------------------------------------------------------------
+
+  // Scroll the active monster into view
   const activeMonsterIndex = activeMonsters
     ? activeMonsters.findIndex((monster) => monster.active === true)
     : null;
+  const activeMonsterCardRef = useRef(null);
+
+  useEffect(() => {
+    if (activeMonsterCardRef.current) {
+      activeMonsterCardRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, [activeMonsterIndex]);
 
   // https://github.com/vercel/next.js/discussions/49131#discussioncomment-6365650
   // https://articles.wesionary.team/using-localstorage-with-next-js-a-beginners-guide-7fc4f8bfd9dc
@@ -590,149 +576,37 @@ export default function CombatTracker({ encounter }) {
     );
   };
 
-  function batchMonsters(monster) {
-    setMonstersToAdd([...monstersToAdd, monster]);
-  }
-
-  function onAddMonsters(monstersToAdd) {
+  function onAddMonsters(monsters) {
     setAddMonstersOpen(false);
-    monstersToAdd.map((monster) => {
-      setActiveMonsters((prev) => [
-        ...prev,
+    // map through the monsters array and add necessary fields to each combatant object
+    const newCombatants = monsters.map((monster) => ({
+      ...monster,
+      maxHP: monster.hit_points,
+      active: false,
+      init: rollInitiative(monster.dexterity),
+      id: nanoid(),
+      type: "monster",
+      qty: monster.qty,
+      conditions: {
+        BLND: false,
+        CHRM: false,
+        DEAF: false,
+        FRGHT: false,
+        GRPL: false,
+        INCAP: false,
+        INVIS: false,
+        PRLZ: false,
+        PETR: false,
+        POIS: false,
+        PRNE: false,
+        REST: false,
+        STUN: false,
+        UNCON: false,
+      },
+    }));
 
-        {
-          ...monster,
-          maxHP: monster.hit_points,
-          active: false,
-          init: rollInitiative(monster.dexterity),
-          id: nanoid(),
-          type: "monster",
-          qty: monster.qty,
-          conditions: {
-            BLND: false,
-            CHRM: false,
-            DEAF: false,
-            FRGHT: false,
-            GRPL: false,
-            INCAP: false,
-            INVIS: false,
-            PRLZ: false,
-            PETR: false,
-            POIS: false,
-            PRNE: false,
-            REST: false,
-            STUN: false,
-            UNCON: false,
-          },
-        },
-      ]);
-    });
-    // setMonstersToAdd([]);
+    dispatch({ type: "added_combatants", newCombatants: newCombatants });
     toast.success("Monsters added to initiative");
-    toast.success("Monsters added to initiative");
-  }
-
-  // Scroll the active monster into view when it changes
-  useEffect(() => {
-    if (activeMonsterCardRef.current) {
-      activeMonsterCardRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-      });
-    }
-  }, [activeMonsterIndex]);
-
-  // const fetchMonsters = async (value) => {
-  //   const variables = { name: value };
-  //   const res = await fetch("/api/monsters", {
-  //     method: "POST",
-  //     body: JSON.stringify({ variables: variables }),
-  //   });
-  //   const data = await res.json();
-  //   setMonsterResults(data);
-  // };
-
-  function handleAddActiveMonster(monster) {
-    // add monster to initiative
-    // 1. check if any activeMonsters already have the same name
-    // if no monster with the matching name already has "1" at the end, update the first occurrence to be "[name] 1"
-    // otherwise, update the first occurrence to be "[name] 1"
-    //
-
-    const existingMonsterIndex = activeMonsters.findIndex(
-      (activeMonster) => activeMonster.name === monster.name
-    );
-
-    // if (existingMonsterIndex !== -1) {
-    //   const updatedMonsters = [...activeMonsters];
-
-    //   if (updatedMonsters[existingMonsterIndex].name.endsWith('1')){
-
-    //   }
-    // }
-
-    if (existingMonsterIndex !== -1) {
-      // An existing monster with the same name was found
-      const updatedMonsters = [...activeMonsters];
-      updatedMonsters[existingMonsterIndex].name = getUniqueMonsterName(
-        monster.name
-      );
-
-      setActiveMonsters([
-        ...updatedMonsters,
-        {
-          ...monster,
-          maxHP: monster.hit_points,
-          active: false,
-          init: rollInitiative(monster.dexterity),
-          id: nanoid(),
-          conditions: {
-            BLND: false,
-            CHRM: false,
-            DEAF: false,
-            FRGHT: false,
-            GRPL: false,
-            INCAP: false,
-            INVIS: false,
-            PRLZ: false,
-            PETR: false,
-            POIS: false,
-            PRNE: false,
-            REST: false,
-            STUN: false,
-            UNCON: false,
-          },
-        },
-      ]);
-    } else {
-      // No existing monster with the same name was found
-      setActiveMonsters([
-        ...activeMonsters,
-        {
-          ...monster,
-          maxHP: monster.hit_points,
-          active: false,
-          init: rollInitiative(monster.dexterity),
-          id: nanoid(),
-          conditions: {
-            BLND: false,
-            CHRM: false,
-            DEAF: false,
-            FRGHT: false,
-            GRPL: false,
-            INCAP: false,
-            INVIS: false,
-            PRLZ: false,
-            PETR: false,
-            POIS: false,
-            PRNE: false,
-            REST: false,
-            STUN: false,
-            UNCON: false,
-          },
-        },
-      ]);
-    }
   }
 
   function getUniqueMonsterName(baseName) {
@@ -767,23 +641,7 @@ export default function CombatTracker({ encounter }) {
   }
 
   function handleDeleteMonster(monster) {
-    // remove monster from activeMonsters
-    const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
-    if (monsterIndex !== -1) {
-      const updatedMonsters = activeMonsters.filter(
-        (_, index) => index !== monsterIndex
-      );
-      setActiveMonsters(updatedMonsters);
-    }
-    // dispatch({ type: "deleted", id: monster.id });
-
-    // toast.success(`${monster.name} deleted`);
-    // toast((t) => (
-    //   <span>
-    //     Custom and <b>bold</b>
-    //     <button onClick={() => toast.dismiss(t.id)}>Dismiss</button>
-    //   </span>
-    // ));
+    dispatch({ type: "combatant_deleted", id: monster.id });
     toast.custom((t) => (
       <div
         aria-live="assertive"
@@ -1003,6 +861,7 @@ export default function CombatTracker({ encounter }) {
       startCombat();
     }
   }
+
   return (
     <div className="bg-slate-600 rounded-lg col-span-6 row-span-6 m-5 flex flex-col items-center relative">
       <AddMonster
@@ -1035,15 +894,18 @@ export default function CombatTracker({ encounter }) {
           ref={parent}
           className="w-full flex overflow-hidden flex-col space-y-2"
         >
-          {sortedInitiative.map((monster, index) => {
+          {sortedCombatants.map((monster, index) => {
             return (
               <li key={monster.id}>
-                {monster.type === "monster" ? (
+                <MonsterCard
+                  monster={monster}
+                  onKill={handleKill}
+                  onDelete={handleDeleteMonster}
+                  onInitChange={handleMonsterInitChange}
+                  onSetCondition={handleMonsterCondition}
+                />
+                {/* {monster.type === "monster" ? (
                   <MonsterCard
-                    // ref={
-                    //   index === activeMonsterIndex ? activeMonsterCardRef : null
-                    // }
-                    ref={monsterCardRef}
                     monster={monster}
                     onKill={handleKill}
                     onDelete={handleDeleteMonster}
@@ -1053,14 +915,14 @@ export default function CombatTracker({ encounter }) {
                   />
                 ) : (
                   <CharacterCard character={monster} />
-                )}
+                )} */}
               </li>
             );
           })}
         </ul>
 
         {/* Empty State */}
-        {sortedInitiative.length === 0 && (
+        {sortedCombatants.length === 0 && (
           <div className=" flex flex-col justify-center text-center h-full my-auto">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -1121,30 +983,15 @@ export default function CombatTracker({ encounter }) {
               Get started by creating a new project.
             </p>
             <div className="mt-6">
-              <button
-                type="button"
-                className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                <PlusIcon
-                  className="-ml-0.5 mr-1.5 h-5 w-5"
-                  aria-hidden="true"
-                />
-                Add Monsters
-              </button>
-              <button
-                type="button"
-                className="ml-6 inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                <PlusIcon
-                  className="-ml-0.5 mr-1.5 h-5 w-5"
-                  aria-hidden="true"
-                />
-                Add Characters
-              </button>
               <Button
                 size="default"
-                variant="sublte"
+                variant="secondary"
+                className="ml-6"
               >
+                <PlusIcon
+                  className="-ml-0.5 mr-1.5 h-5 w-5"
+                  aria-hidden="true"
+                />
                 some ext
               </Button>
             </div>
