@@ -6,6 +6,7 @@ import SiteHeader from "@/components/SiteHeader";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { Encounter } from "@/lib/types/encounter";
+import toast, { Toaster } from "react-hot-toast";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -41,6 +42,7 @@ export default async function RootLayout({
         // className={`h-screen grid grid-cols-12 grid-rows-[48px_repeat(5,_1fr)] auto-rows-min ${inter.className}`}
         className={`flex flex-col h-screen ${inter.className}`}
       >
+        <Toaster />
         <SiteHeader encounters={encounters} />
         <main className="h-full grid grid-cols-12 grid-rows-6">{children}</main>
       </body>

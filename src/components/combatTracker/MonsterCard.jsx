@@ -15,6 +15,7 @@ import { useState, useEffect, forwardRef, useRef, Fragment } from "react";
 import { CONDITIONS } from "@/lib/constants";
 import { Transition } from "@headlessui/react";
 import { ClockIcon, HeartIcon } from "@heroicons/react/24/outline";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 import { Popover } from "@headlessui/react";
 
@@ -48,6 +49,7 @@ const MonsterCard = forwardRef(
     const [currHP, setCurrHP] = useState(monster.hit_points);
     const [inputValue, setInputValue] = useState(monster.init);
     const [conditionsOpen, setConditionsOpen] = useState(false);
+    const [parent, enableAnimations] = useAutoAnimate();
 
     const popoverRef = useRef(null);
 
@@ -318,31 +320,33 @@ const MonsterCard = forwardRef(
             leaveFrom="opacity-100 translate-y-0"
             leaveTo="opacity-0 -translate-y-full"
           >
-            {conditionsOpen && (
-              <ul className="flex gap-1 flex-wrap mt-2">
-                {CONDITIONS.sort().map((cond) => (
-                  <li key={cond}>
-                    <button
-                      onClick={() => onSetCondition(monster, cond)}
-                      className={classNames(
-                        monster.conditions[cond]
-                          ? "text-sky-200 border-sky-200"
-                          : "",
-                        "border border-slate-100 px-2 py-1 rounded-md text-xs hover:bg-slate-700"
-                      )}
-                    >
-                      {cond}
-                    </button>
-                  </li>
-                ))}
-                <button
-                  className="border border-slate-100 px-2 py-1 rounded-md text-xs hover:bg-slate-700 uppercase"
-                  onClick={() => onSetCondition(monster, "CLEAR")}
-                >
-                  clear
-                </button>
-              </ul>
-            )}
+            <div ref={parent}>
+              {conditionsOpen && (
+                <ul className="flex gap-1 flex-wrap mt-2">
+                  {CONDITIONS.sort().map((cond) => (
+                    <li key={cond}>
+                      <button
+                        onClick={() => onSetCondition(monster, cond)}
+                        className={classNames(
+                          monster.conditions[cond]
+                            ? "text-sky-200 border-sky-200"
+                            : "",
+                          "border border-slate-100 px-2 py-1 rounded-md text-xs hover:bg-slate-700"
+                        )}
+                      >
+                        {cond}
+                      </button>
+                    </li>
+                  ))}
+                  <button
+                    className="border border-slate-100 px-2 py-1 rounded-md text-xs hover:bg-slate-700 uppercase"
+                    onClick={() => onSetCondition(monster, "CLEAR")}
+                  >
+                    clear
+                  </button>
+                </ul>
+              )}
+            </div>
           </Transition>
         </div>
       </>

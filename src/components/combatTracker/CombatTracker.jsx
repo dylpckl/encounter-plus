@@ -13,6 +13,7 @@ import {
 import { nanoid } from "nanoid";
 import { Dialog, Transition, Switch } from "@headlessui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import toast from "react-hot-toast";
 
 // Components
 import MonsterCard from "@/components/combatTracker/MonsterCard";
@@ -625,6 +626,8 @@ export default function CombatTracker({ encounter }) {
       ]);
     });
     // setMonstersToAdd([]);
+    toast.success("Monsters added to initiative");
+    toast.success("Monsters added to initiative");
   }
 
   // Scroll the active monster into view when it changes
