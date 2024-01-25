@@ -40,7 +40,7 @@ export default async function RootLayout({
     <html lang="en">
       <body
         // className={`h-screen grid grid-cols-12 grid-rows-[48px_repeat(5,_1fr)] auto-rows-min ${inter.className}`}
-        className={`flex flex-col h-screen ${inter.className}`}
+        className={`flex flex-col bg-slate-900 text-slate-100 h-screen ${inter.className}`}
       >
         <Toaster />
         <SiteHeader encounters={encounters} />

@@ -8,17 +8,16 @@
 // show first 3 active conditions in footer
 // structure: footer
 // turn timer
-//
-//
 
+// External
 import { useState, useEffect, forwardRef, useRef, Fragment } from "react";
-import { CONDITIONS } from "@/lib/constants";
-import { Transition } from "@headlessui/react";
+import { Transition, Menu } from "@headlessui/react";
+import { EllipsisHorizontalIcon } from "@heroicons/react/20/solid";
 import { ClockIcon, HeartIcon } from "@heroicons/react/24/outline";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
-import { Popover } from "@headlessui/react";
-
+// Lib
+import { CONDITIONS } from "@/lib/constants";
 import useDebounce from "@/lib/hooks/useDebounce";
 import useOnClickOutside from "@/lib/hooks/useOnClickOutside";
 
@@ -46,19 +45,17 @@ const MonsterCard = forwardRef(
     },
     ref
   ) => {
+    // STATE ---------------------------------------------------------------
     const [currHP, setCurrHP] = useState(monster.hit_points);
     const [inputValue, setInputValue] = useState(monster.init);
-    const [conditionsOpen, setConditionsOpen] = useState(false);
-    const [parent, enableAnimations] = useAutoAnimate();
-
-    const popoverRef = useRef(null);
-
-    const [popoverOpen, setPopoverOpen] = useState(false);
-
     const [newInit, setNewInit] = useState(monster.init);
-
+    const [conditionsOpen, setConditionsOpen] = useState(false);
+    const [popoverOpen, setPopoverOpen] = useState(false);
+    
+    // HOOKS ---------------------------------------------------------------
+    const popoverRef = useRef(null);
+    const [parent, enableAnimations] = useAutoAnimate();
     const debouncedInit = useDebounce(newInit);
-
     useOnClickOutside(popoverRef, () => setPopoverOpen(false));
 
     const ConditionsButton = () => {
@@ -156,7 +153,7 @@ const MonsterCard = forwardRef(
           >
             <div
               ref={popoverRef}
-              className="absolute w-12 h-12 -right-20 z-50 bg-sky-300"
+              className="absolute w-12 h-12 top-20 -right-20 z-50 bg-sky-300"
             >
               aaaaaaaaa
             </div>
@@ -286,26 +283,66 @@ const MonsterCard = forwardRef(
             <ConditionsButton />
 
             <div className="flex items-center">
-              <button onClick={() => onKill(monster)}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 512 512"
-                  className="mr-2 w-5 h-5 fill-slate-400 hover:fill-red-400"
-                >
-                  <path d="M368 400c-.4-16 7.3-31.2 20.4-40.4C436.1 326.2 464 276.9 464 224c0-91.4-86.9-176-208-176S48 132.6 48 224c0 52.9 27.9 102.2 75.6 135.6c13.1 9.2 20.8 24.4 20.4 40.4l0 0v64h48V440c0-13.3 10.7-24 24-24s24 10.7 24 24v24h32V440c0-13.3 10.7-24 24-24s24 10.7 24 24v24h48V400l0 0zm48-1.1c0 .4 0 .7 0 1.1v64c0 26.5-21.5 48-48 48H144c-26.5 0-48-21.5-48-48V400c0-.4 0-.7 0-1.1C37.5 357.8 0 294.7 0 224C0 100.3 114.6 0 256 0S512 100.3 512 224c0 70.7-37.5 133.8-96 174.9zM112 256a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm232-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z" />
-                </svg>
-              </button>
+              <Menu
+                as="div"
+                className="relative inline-block text-left"
+              >
+                <div>
+                  <Menu.Button>
+                    <EllipsisHorizontalIcon
+                      className="-mr-1 h-5 w-5 text-gray-400"
+                      aria-hidden="true"
+                    />
+                  </Menu.Button>
+                </div>
 
-              <button onClick={() => onDelete(monster)}>
-                <svg
-                  className="w-5 h-5 fill-slate-400 hover:fill-black"
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="1em"
-                  viewBox="0 0 448 512"
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
                 >
-                  <path d="M170.5 51.6L151.5 80h145l-19-28.4c-1.5-2.2-4-3.6-6.7-3.6H177.1c-2.7 0-5.2 1.3-6.7 3.6zm147-26.6L354.2 80H368h48 8c13.3 0 24 10.7 24 24s-10.7 24-24 24h-8V432c0 44.2-35.8 80-80 80H112c-44.2 0-80-35.8-80-80V128H24c-13.3 0-24-10.7-24-24S10.7 80 24 80h8H80 93.8l36.7-55.1C140.9 9.4 158.4 0 177.1 0h93.7c18.7 0 36.2 9.4 46.6 24.9zM80 128V432c0 17.7 14.3 32 32 32H336c17.7 0 32-14.3 32-32V128H80zm80 64V400c0 8.8-7.2 16-16 16s-16-7.2-16-16V192c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0V400c0 8.8-7.2 16-16 16s-16-7.2-16-16V192c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0V400c0 8.8-7.2 16-16 16s-16-7.2-16-16V192c0-8.8 7.2-16 16-16s16 7.2 16 16z" />
-                </svg>
-              </button>
+                  <Menu.Items className="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <div className="py-1">
+                      <Menu.Item>
+                        {({ active }) => (
+                          // className={classNames(
+                          //   active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                          //   'block px-4 py-2 text-sm'
+                          // )}
+
+                          <button onClick={() => onKill(monster)}>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 512 512"
+                              className="mr-2 w-5 h-5 fill-slate-400 hover:fill-red-400"
+                            >
+                              <path d="M368 400c-.4-16 7.3-31.2 20.4-40.4C436.1 326.2 464 276.9 464 224c0-91.4-86.9-176-208-176S48 132.6 48 224c0 52.9 27.9 102.2 75.6 135.6c13.1 9.2 20.8 24.4 20.4 40.4l0 0v64h48V440c0-13.3 10.7-24 24-24s24 10.7 24 24v24h32V440c0-13.3 10.7-24 24-24s24 10.7 24 24v24h48V400l0 0zm48-1.1c0 .4 0 .7 0 1.1v64c0 26.5-21.5 48-48 48H144c-26.5 0-48-21.5-48-48V400c0-.4 0-.7 0-1.1C37.5 357.8 0 294.7 0 224C0 100.3 114.6 0 256 0S512 100.3 512 224c0 70.7-37.5 133.8-96 174.9zM112 256a56 56 0 1 1 112 0 56 56 0 1 1 -112 0zm232-56a56 56 0 1 1 0 112 56 56 0 1 1 0-112z" />
+                            </svg>
+                          </button>
+                        )}
+                      </Menu.Item>
+                      <Menu.Item>
+                        {({ active }) => (
+                          <button onClick={() => onDelete(monster)}>
+                            <svg
+                              className="w-5 h-5 fill-slate-400 hover:fill-black"
+                              xmlns="http://www.w3.org/2000/svg"
+                              height="1em"
+                              viewBox="0 0 448 512"
+                            >
+                              <path d="M170.5 51.6L151.5 80h145l-19-28.4c-1.5-2.2-4-3.6-6.7-3.6H177.1c-2.7 0-5.2 1.3-6.7 3.6zm147-26.6L354.2 80H368h48 8c13.3 0 24 10.7 24 24s-10.7 24-24 24h-8V432c0 44.2-35.8 80-80 80H112c-44.2 0-80-35.8-80-80V128H24c-13.3 0-24-10.7-24-24S10.7 80 24 80h8H80 93.8l36.7-55.1C140.9 9.4 158.4 0 177.1 0h93.7c18.7 0 36.2 9.4 46.6 24.9zM80 128V432c0 17.7 14.3 32 32 32H336c17.7 0 32-14.3 32-32V128H80zm80 64V400c0 8.8-7.2 16-16 16s-16-7.2-16-16V192c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0V400c0 8.8-7.2 16-16 16s-16-7.2-16-16V192c0-8.8 7.2-16 16-16s16 7.2 16 16zm80 0V400c0 8.8-7.2 16-16 16s-16-7.2-16-16V192c0-8.8 7.2-16 16-16s16 7.2 16 16z" />
+                            </svg>
+                          </button>
+                        )}
+                      </Menu.Item>
+                    </div>
+                  </Menu.Items>
+                </Transition>
+              </Menu>
             </div>
           </div>
 

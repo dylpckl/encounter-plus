@@ -63,13 +63,102 @@ const CHARACTERS = [
 ];
 
 function combatantReducer(combatants, action) {
+  combatants = combatants || [];
+
   switch (action.type) {
     case "added_combatants":
-      console.log(action.newCombatants);
       return [...combatants, ...action.newCombatants];
     case "deleted_combatant":
       return combatants.filter((c) => c.id !== action.id);
+    case "undo_deleted_combatant":
+      return [...combatants, action.monster];
     case "updated_combatant":
+      // console.log(
+      //   "updated_conditions: ",
+      //   action.combatant,
+      //   action.key,
+      //   action.newValue
+      // );
+      return (
+        combatants &&
+        combatants.map((c) => {
+          if (c.id === action.monster.id) {
+            return {
+              ...c,
+              [action.key]: action.newValue,
+            };
+          } else {
+            return c;
+          }
+        })
+      );
+    case "updated_conditions":
+      return combatants.map((c) => {
+        if (c.id === action.combatant.id) {
+          if (action.condition === "CLEAR") {
+            return {
+              ...c,
+              conditions: {
+                BLND: false,
+                CHRM: false,
+                DEAF: false,
+                FRGHT: false,
+                GRPL: false,
+                INCAP: false,
+                INVIS: false,
+                PRLZ: false,
+                PETR: false,
+                POIS: false,
+                PRNE: false,
+                REST: false,
+                STUN: false,
+                UNCON: false,
+              },
+            };
+          } else {
+            return {
+              ...c,
+              conditions: {
+                ...c.conditions,
+                [action.condition]: !c.conditions[action.condition],
+              },
+            };
+          }
+        } else {
+          return c;
+        }
+      });
+    case "fetched_combatants":
+      return action.combatants;
+    case "clear_initiative":
+      return [];
+    case "start_combat":
+      const sortedCombatants = combatants
+        .slice()
+        .sort((a, b) => b.init - a.init);
+      // console.log(sortedMonsters);
+      // Mark the monster with the highest "init" value as active
+      const updatedCombatants = sortedCombatants.map((monster, index) => ({
+        ...monster,
+        active: index === 0, // Set the first monster as active
+      }));
+      return updatedCombatants;
+      // case "next_turn":
+      return combatants.map((c) => {
+        if (c.active) {
+          // return combatants with active set to false and the next index set to true
+          const updatedCombatants = [...combatants];
+          updatedCombatants[combatants.indexOf(c)].active = false;
+          updatedCombatants[
+            combatants.indexOf(c) + 1 < combatants.length
+              ? combatants.indexOf(c) + 1
+              : 0
+          ].active = true;
+          return updatedCombatants;
+        } else {
+          return c;
+        }
+      });
 
     default: {
       throw Error("unknown action: " + action.type);
@@ -78,62 +167,50 @@ function combatantReducer(combatants, action) {
 }
 
 export default function CombatTracker({ encounter }) {
+  // STATE ---------------------------------------------------------------
   const [combatants, dispatch] = useReducer(combatantReducer, []);
-  console.log(combatants);
-  const [parent, enableAnimations] = useAutoAnimate();
-
-  // const [query, setQuery] = useState("");
-  const [manageCharactersOpen, setManageCharactersOpen] = useState(false);
-  const [characters, setCharacters] = useState([]);
-  // const [characters, setCharacters] = useState(() => {
-  //   return typeof window !== "undefined"
-  //     ? JSON.parse(window.localStorage.getItem("characters"))
-  //     : [];
-  // });
-
-  // const [localActiveMonsters] = useState(() => {
-  //   return typeof window !== "undefined"
-  //     ? JSON.parse(window.localStorage.getItem("activeMonsters"))
-  //     : [];
-  // });
-
+  const [addCharactersOpen, setAddCharactersOpen] = useState(false);
+  const [addMonstersOpen, setAddMonstersOpen] = useState(false);
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [roundCtr, setRoundCtr] = useState(1);
+  const [combatActive, setCombatActive] = useState(false);
 
-  const [activeMonsters, setActiveMonsters] = useState([]);
+  // DERIVED -------------------------------------------------------------
+  const activeCombatantIndex =
+    combatants && combatants.findIndex((monster) => monster.active === true);
 
+  // HOOKS ---------------------------------------------------------------
+  const [parent, enableAnimations] = useAutoAnimate();
+  const activeCombatantRef = useRef(null);
+
+  // SIDE EFFECTS --------------------------------------------------------
   useEffect(() => {
-    // let storedData = localStorage.getItem("activeMonsters");
-
-    // // Check if the storedData is the string "undefined"
-    // if (storedData === "undefined") {
-    //   return; // Do nothing if the storedData is "undefined"
-    // }
-
-    // try {
-    //   let mon = JSON.parse(storedData);
-    //   setActiveMonsters(mon);
-    // } catch (error) {
-    //   console.error("Error parsing JSON:", error);
-    //   // Handle the error, e.g., set default values or clear localStorage
-    // }
-
     if (typeof window !== "undefined" && window.localStorage) {
-      console.log(typeof window, window.localStorage);
-      let storedCharacters = JSON.parse(
-        window.localStorage.getItem("characters")
-      );
-      let storedMonsters = JSON.parse(localStorage.getItem("activeMonsters"));
-      let storedRoundCtr = JSON.parse(window.localStorage.getItem("roundCtr"));
-      let storedCombatActive = JSON.parse(
+      const localCombatants = JSON.parse(localStorage.getItem("combatants"));
+      const localRoundCtr = JSON.parse(localStorage.getItem("roundCtr"));
+      const localCombatActive = JSON.parse(
         localStorage.getItem("combatActive") === true
       );
+      setRoundCtr(localRoundCtr);
 
-      setActiveMonsters(storedMonsters);
-      // setCharacters(storedCharacters);
-      // setRoundCtr(storedRoundCtr);
-      // setCombatActive(storedCombatActive);
+      dispatch({ type: "fetched_combatants", combatants: localCombatants });
     }
+    //     console.log(typeof window, window.localStorage);
+    //     let storedCharacters = JSON.parse(
+    //       window.localStorage.getItem("characters")
+    //     );
+    //     let storedMonsters = JSON.parse(localStorage.getItem("activeMonsters"));
+    //     let storedRoundCtr = JSON.parse(window.localStorage.getItem("roundCtr"));
+    //     let storedCombatActive = JSON.parse(
+    //       localStorage.getItem("combatActive") === true
+    //     );
+
+    //     setActiveMonsters(storedMonsters);
+    //     // setCharacters(storedCharacters);
+    //     // setRoundCtr(storedRoundCtr);
+    //     // setCombatActive(storedCombatActive);
+    //   }
   }, []);
 
   useEffect(() => {
@@ -144,52 +221,20 @@ export default function CombatTracker({ encounter }) {
     return () => clearInterval(intervalId);
   }, [isRunning]);
 
-  const [roundCtr, setRoundCtr] = useState(1);
-  // const [roundCtr, setRoundCtr] = useState(() => {
-  //   return typeof window !== "undefined"
-  //     ? JSON.parse(window.localStorage.getItem("roundCtr"))
-  //     : 1;
-  // });
-  const [combatActive, setCombatActive] = useState(false);
-  // const [combatActive, setCombatActive] = useState(() => {
-  //   return typeof window !== "undefined"
-  //     ? JSON.parse(localStorage.getItem("combatActive") === true)
-  //     : false;
-  // });
-
-  const [addMonstersOpen, setAddMonstersOpen] = useState(false);
-
-  // const sortedMonsters = activeMonsters.sort((a, b) => b.init - a.init);
-  // const initiative =
-  //   activeMonsters && activeMonsters.length > 0
-  //     ? [...activeMonsters, ...characters]
-  //     : [];
-  // const sortedInitiative = initiative.sort((a, b) => b.init - a.init);
-
-  const sortedCombatants = combatants.sort((a, b) => b.init - a.init);
-
-
-  // SIDE EFFECTS ------------------------------------------------------
-  // 
-  // ---------------------------------------------------------------------
-
-  // Scroll the active monster into view
-  const activeMonsterIndex = activeMonsters
-    ? activeMonsters.findIndex((monster) => monster.active === true)
-    : null;
-  const activeMonsterCardRef = useRef(null);
-
   useEffect(() => {
-    if (activeMonsterCardRef.current) {
-      activeMonsterCardRef.current.scrollIntoView({
+    // Scroll the active monster into view
+    if (activeCombatantRef.current) {
+      activeCombatantRef.current.scrollIntoView({
         behavior: "smooth",
         block: "end",
       });
     }
-  }, [activeMonsterIndex]);
+  }, [activeCombatantIndex]);
 
   // https://github.com/vercel/next.js/discussions/49131#discussioncomment-6365650
   // https://articles.wesionary.team/using-localstorage-with-next-js-a-beginners-guide-7fc4f8bfd9dc
+  // https://nextjs.org/docs/messages/react-hydration-error
+
   // useEffect(() => {
   //   if (typeof window !== "undefined" && window.localStorage) {
   //     localStorage.setItem("activeMonsters", JSON.stringify(activeMonsters));
@@ -200,7 +245,6 @@ export default function CombatTracker({ encounter }) {
   //   // console.log("saving...", window.localStorage);
   // }, [localActiveMonsters, activeMonsters]);
 
-  // https://nextjs.org/docs/messages/react-hydration-error
   // useEffect(() => {
   //   console.log("mount");
   //   if (typeof window !== "undefined" && window.localStorage) {
@@ -576,7 +620,7 @@ export default function CombatTracker({ encounter }) {
     );
   };
 
-  function onAddMonsters(monsters) {
+  function handleAddMonsters(monsters) {
     setAddMonstersOpen(false);
     // map through the monsters array and add necessary fields to each combatant object
     const newCombatants = monsters.map((monster) => ({
@@ -623,6 +667,7 @@ export default function CombatTracker({ encounter }) {
     return newName;
   }
 
+  // REFACTOR
   function handleKill(monster) {
     // console.log(monster);
     // set monster hp to zero
@@ -640,8 +685,8 @@ export default function CombatTracker({ encounter }) {
     }
   }
 
-  function handleDeleteMonster(monster) {
-    dispatch({ type: "combatant_deleted", id: monster.id });
+  function handleDeleteCombatant(monster) {
+    dispatch({ type: "deleted_combatant", id: monster.id });
     toast.custom((t) => (
       <div
         aria-live="assertive"
@@ -657,7 +702,7 @@ export default function CombatTracker({ encounter }) {
                   </p>
                   <button
                     type="button"
-                    onClick={() => undoDeleteMonster(monster, t.id)}
+                    onClick={() => undoDeleteCombatant(monster, t.id)}
                     className="ml-3 flex-shrink-0 rounded-md bg-white text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   >
                     Undo
@@ -684,59 +729,34 @@ export default function CombatTracker({ encounter }) {
     ));
   }
 
-  function undoDeleteMonster(monster, toastId) {
-    // add monster back to activeMonsters
-    setActiveMonsters((prev) => [...prev, monster]);
+  function undoDeleteCombatant(monster, toastId) {
+    dispatch({ type: "undo_deleted_combatant", monster: monster });
     toast.remove(toastId);
   }
 
   function handleMonsterCondition(monster, condition) {
-    // find the monster index
-    const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
-
-    if (monsterIndex !== -1) {
-      const updatedMonsters = [...activeMonsters];
-      const currentConditionValue = monster.conditions[condition];
-
-      if (condition === "CLEAR") {
-        const updatedConditions = {};
-        for (const key in monster.conditions) {
-          if (monster.conditions.hasOwnProperty(key)) {
-            updatedConditions[key] = false;
-          }
-        }
-        updatedMonsters[monsterIndex] = {
-          ...monster,
-          conditions: updatedConditions,
-        };
-      } else {
-        updatedMonsters[monsterIndex] = {
-          ...monster,
-          conditions: {
-            ...monster.conditions,
-            [condition]: !currentConditionValue,
-          },
-        };
-      }
-
-      // Update the state with the new array
-      setActiveMonsters(updatedMonsters);
-    }
+    dispatch({
+      type: "updated_conditions",
+      combatant: monster,
+      condition: condition,
+    });
   }
 
   function startCombat() {
-    console.log("combat starting");
-    const sortedMonsters = activeMonsters
-      .slice()
-      .sort((a, b) => b.init - a.init);
-    console.log(sortedMonsters);
-    // Mark the monster with the highest "init" value as active
-    const updatedMonsters = sortedMonsters.map((monster, index) => ({
-      ...monster,
-      active: index === 0, // Set the first monster as active
-    }));
+    // console.log("combat starting");
+    // const sortedMonsters = activeMonsters
+    //   .slice()
+    //   .sort((a, b) => b.init - a.init);
+    // console.log(sortedMonsters);
+    // // Mark the monster with the highest "init" value as active
+    // const updatedMonsters = sortedMonsters.map((monster, index) => ({
+    //   ...monster,
+    //   active: index === 0, // Set the first monster as active
+    // }));
 
-    setActiveMonsters(updatedMonsters);
+    // setActiveMonsters(updatedMonsters);
+
+    dispatch({ type: "start_combat" });
     setCombatActive(true);
     setTime(1);
     setIsRunning(true);
@@ -770,39 +790,41 @@ export default function CombatTracker({ encounter }) {
   }
 
   function nextTurn() {
-    console.log(activeMonsterCardRef);
-    if (activeMonsterCardRef.current) {
-      activeMonsterCardRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-      });
-    }
-    const activeIndex = activeMonsters.findIndex((monster) => monster.active);
+    // console.log(activeMonsterCardRef);
+    // if (activeMonsterCardRef.current) {
+    //   activeMonsterCardRef.current.scrollIntoView({
+    //     behavior: "smooth",
+    //     block: "end",
+    //   });
+    // }
 
-    if (activeIndex !== -1) {
-      const updatedMonsters = [...activeMonsters]; // copy the activeMonster array so that we don't modify the original
-      updatedMonsters[activeIndex].active = false; // mark the currently active monster as inactive
+    dispatch({ type: "next_turn" });
 
-      const sortedMonsters = updatedMonsters
-        .slice()
-        .sort((a, b) => b.init - a.init);
+    // const activeIndex = activeMonsters.findIndex((monster) => monster.active);
 
-      // find the index of the next monster that will be active.
-      // If activeIndex is less than the length of sortedMonsters - 1, increment the index by 1.
-      // Otherwise, if it's the last monster in the array, wrap around to the first monster (0 index)
-      const nextActiveIndex =
-        activeIndex < sortedMonsters.length - 1 ? activeIndex + 1 : 0;
+    // if (activeIndex !== -1) {
+    //   const updatedMonsters = [...activeMonsters]; // copy the activeMonster array so that we don't modify the original
+    //   updatedMonsters[activeIndex].active = false; // mark the currently active monster as inactive
 
-      // Check if the next turn starts a new round
-      if (nextActiveIndex === 0) {
-        setRoundCtr(roundCtr + 1);
-        // turnCounter = 1
-      }
+    //   const sortedMonsters = updatedMonsters
+    //     .slice()
+    //     .sort((a, b) => b.init - a.init);
 
-      sortedMonsters[nextActiveIndex].active = true;
+    //   // find the index of the next monster that will be active.
+    //   // If activeIndex is less than the length of sortedMonsters - 1, increment the index by 1.
+    //   // Otherwise, if it's the last monster in the array, wrap around to the first monster (0 index)
+    //   const nextActiveIndex =
+    //     activeIndex < sortedMonsters.length - 1 ? activeIndex + 1 : 0;
 
-      setActiveMonsters(sortedMonsters);
-    }
+    //   // Check if the next turn starts a new round
+    //   if (nextActiveIndex === 0) {
+    //     setRoundCtr(roundCtr + 1);
+    //     // turnCounter = 1
+    //   }
+
+    //   sortedMonsters[nextActiveIndex].active = true;
+    //   setActiveMonsters(sortedMonsters);
+    // }
   }
 
   function prevTurn() {
@@ -825,23 +847,28 @@ export default function CombatTracker({ encounter }) {
   }
 
   function handleMonsterInitChange(monster, newInit) {
-    const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
-    const updatedMonsters = [...activeMonsters];
-    updatedMonsters[monsterIndex] = { ...monster, init: newInit };
-    setActiveMonsters(updatedMonsters);
-
-    // dispatch({ type: "updateInit", monster: monster });
+    dispatch({
+      type: "updated_combatant",
+      monster: monster,
+      key: "init",
+      newValue: newInit,
+    });
   }
 
-  function handleMonsterUpdate(monster, keyToUpdate, newValue) {
-    const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
-    if (monsterIndex !== -1) {
-      const updatedMonsters = [...activeMonsters];
-      updatedMonsters[monsterIndex] = { ...monster, [keyToUpdate]: newValue };
-      setActiveMonsters(updatedMonsters);
-    }
+  function handleCombatantUpdate(monster, key, newValue) {
+    // const monsterIndex = activeMonsters.findIndex((m) => m.id === monster.id);
+    // if (monsterIndex !== -1) {
+    //   const updatedMonsters = [...activeMonsters];
+    //   updatedMonsters[monsterIndex] = { ...monster, [keyToUpdate]: newValue };
+    //   setActiveMonsters(updatedMonsters);
+    // }
 
-    // dispatch({type:'update'})
+    dispatch({
+      type: "updated_combatant",
+      monster: monster,
+      key: key,
+      newValue: newValue,
+    });
   }
 
   function handleRestartCombat() {
@@ -850,6 +877,7 @@ export default function CombatTracker({ encounter }) {
 
   function handleClearInitiative() {
     // remove all combatants
+    dispatch({ type: "clear_initiative" });
   }
 
   function handlePlayPause() {
@@ -863,27 +891,29 @@ export default function CombatTracker({ encounter }) {
   }
 
   return (
-    <div className="bg-slate-600 rounded-lg col-span-6 row-span-6 m-5 flex flex-col items-center relative">
+    <div className="bg-slate-800 shadow-xl rounded-lg col-span-6 row-span-6 m-5 flex flex-col items-center relative">
+      {/* Modals */}
       <AddMonster
         open={addMonstersOpen}
         setOpen={setAddMonstersOpen}
-        onAddMonsters={onAddMonsters}
+        onAddMonsters={handleAddMonsters}
         encounter={encounter}
       />
       {/* <ManageCharacters /> */}
 
+      {/* Header */}
       <div
         id="header"
-        className="w-full flex justify-between items-center border-b border-slate-500 p-3"
+        className="w-full flex justify-between items-center rounded-t-md bg-slate-700 px-3 py-2.5 text-sm uppercase text-slate-200"
       >
-        <h1 className="text-sm uppercase">combat tracker</h1>
+        <h1 className=" font-medium tracking-wide">combat tracker</h1>
         <div className="flex gap-4">
           <span>round {roundCtr}</span>
           <Stopwatch time={time} />
         </div>
         <Setup
           onAddMonsters={() => setAddMonstersOpen(true)}
-          // onaddCharacter={handleAddCharacter}
+          onAddCharacter={() => setAddCharactersOpen(true)}
           onClearInitiative={handleClearInitiative}
         />
       </div>
@@ -892,19 +922,23 @@ export default function CombatTracker({ encounter }) {
       <div className=" overflow-y-auto h-full w-full p-3">
         <ul
           ref={parent}
-          className="w-full flex overflow-hidden flex-col space-y-2"
+          className="w-full flex  flex-col space-y-2 "
         >
-          {sortedCombatants.map((monster, index) => {
-            return (
-              <li key={monster.id}>
-                <MonsterCard
-                  monster={monster}
-                  onKill={handleKill}
-                  onDelete={handleDeleteMonster}
-                  onInitChange={handleMonsterInitChange}
-                  onSetCondition={handleMonsterCondition}
-                />
-                {/* {monster.type === "monster" ? (
+          {combatants &&
+            combatants.length > 0 &&
+            combatants
+              .sort((a, b) => b.init - a.init)
+              .map((monster, index) => {
+                return (
+                  <li key={monster.id}>
+                    <MonsterCard
+                      monster={monster}
+                      onKill={handleKill}
+                      onDelete={handleDeleteCombatant}
+                      onInitChange={handleMonsterInitChange}
+                      onSetCondition={handleMonsterCondition}
+                    />
+                    {/* {monster.type === "monster" ? (
                   <MonsterCard
                     monster={monster}
                     onKill={handleKill}
@@ -916,87 +950,88 @@ export default function CombatTracker({ encounter }) {
                 ) : (
                   <CharacterCard character={monster} />
                 )} */}
-              </li>
-            );
-          })}
+                  </li>
+                );
+              })}
         </ul>
 
         {/* Empty State */}
-        {sortedCombatants.length === 0 && (
-          <div className=" flex flex-col justify-center text-center h-full my-auto">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              className="mx-auto h-12 w-12 text-gray-400"
-            >
-              <polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5" />
-              <line
-                x1="13"
-                x2="19"
-                y1="19"
-                y2="13"
-              />
-              <line
-                x1="16"
-                x2="20"
-                y1="16"
-                y2="20"
-              />
-              <line
-                x1="19"
-                x2="21"
-                y1="21"
-                y2="19"
-              />
-              <polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5" />
-              <line
-                x1="5"
-                x2="9"
-                y1="14"
-                y2="18"
-              />
-              <line
-                x1="7"
-                x2="4"
-                y1="17"
-                y2="20"
-              />
-              <line
-                x1="3"
-                x2="5"
-                y1="19"
-                y2="21"
-              />
-            </svg>
-
-            <h3 className="mt-2 text-sm font-semibold text-gray-900">
-              No combatants
-            </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Get started by creating a new project.
-            </p>
-            <div className="mt-6">
-              <Button
-                size="default"
-                variant="secondary"
-                className="ml-6"
+        {!combatants ||
+          (combatants.length === 0 && (
+            <div className=" flex flex-col justify-center text-center h-full my-auto">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mx-auto h-12 w-12 text-gray-400"
               >
-                <PlusIcon
-                  className="-ml-0.5 mr-1.5 h-5 w-5"
-                  aria-hidden="true"
+                <polyline points="14.5 17.5 3 6 3 3 6 3 17.5 14.5" />
+                <line
+                  x1="13"
+                  x2="19"
+                  y1="19"
+                  y2="13"
                 />
-                some ext
-              </Button>
+                <line
+                  x1="16"
+                  x2="20"
+                  y1="16"
+                  y2="20"
+                />
+                <line
+                  x1="19"
+                  x2="21"
+                  y1="21"
+                  y2="19"
+                />
+                <polyline points="14.5 6.5 18 3 21 3 21 6 17.5 9.5" />
+                <line
+                  x1="5"
+                  x2="9"
+                  y1="14"
+                  y2="18"
+                />
+                <line
+                  x1="7"
+                  x2="4"
+                  y1="17"
+                  y2="20"
+                />
+                <line
+                  x1="3"
+                  x2="5"
+                  y1="19"
+                  y2="21"
+                />
+              </svg>
+
+              <h3 className="mt-2 text-sm font-semibold text-gray-900">
+                No combatants
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Get started by creating a new project.
+              </p>
+              <div className="mt-6">
+                <Button
+                  size="default"
+                  variant="secondary"
+                  className="ml-6"
+                >
+                  <PlusIcon
+                    className="-ml-0.5 mr-1.5 h-5 w-5"
+                    aria-hidden="true"
+                  />
+                  some ext
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
+          ))}
       </div>
 
       {/* Footer */}
@@ -1065,3 +1100,95 @@ export default function CombatTracker({ encounter }) {
     </div>
   );
 }
+
+const testCombatants = [
+  {
+    id: "1",
+    name: "Goblin",
+    dexterity: 14,
+    armor_class: [
+      {
+        value: 15,
+      },
+    ],
+    hit_points: 7,
+    maxHP: 7,
+    active: false,
+    init: 10,
+    type: "monster",
+    qty: 1,
+    id: nanoid(),
+    conditions: {
+      BLND: false,
+      CHRM: false,
+      DEAF: false,
+      FRGHT: false,
+      GRPL: false,
+      INCAP: false,
+      INVIS: false,
+      PRLZ: false,
+      PETR: false,
+      POIS: false,
+      PRNE: false,
+      REST: false,
+      STUN: false,
+      UNCON: false,
+    },
+    damage_immunities: [],
+    damage_resistances: [],
+    damage_vulnerabilities: [],
+    proficiencies: [
+      {
+        value: 2,
+        proficiency: {
+          index: "saving-throw-con",
+        },
+      },
+    ],
+  },
+  {
+    id: "2",
+    name: "Orc",
+    dexterity: 12,
+    armor_class: [
+      {
+        value: 13,
+      },
+    ],
+    maxHP: 7,
+    active: false,
+    init: 10,
+    type: "monster",
+    qty: 1,
+    id: nanoid(),
+    conditions: {
+      BLND: false,
+      CHRM: false,
+      DEAF: false,
+      FRGHT: false,
+      GRPL: false,
+      INCAP: false,
+      INVIS: false,
+      PRLZ: false,
+      PETR: false,
+      POIS: false,
+      PRNE: false,
+      REST: false,
+      STUN: false,
+      UNCON: false,
+    },
+    hit_points: 15,
+    damage_immunities: [],
+    damage_resistances: ["poison"],
+    damage_vulnerabilities: [],
+    proficiencies: [
+      {
+        value: 2,
+        proficiency: {
+          index: "saving-throw-con",
+        },
+      },
+    ],
+  },
+  // Add more monsters as needed
+];
